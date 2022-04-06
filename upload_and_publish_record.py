@@ -13,12 +13,14 @@ def upload_record(url, record_path, record, request_headers ):
     # Create a record in the PostgreSQL database
     # Get the url for the record's attached files
     # e.g., 'https://dev1-big-map-archive.materialscloud.org/api/records/cpbc8-ss975/draft/files'
-    data_files_url = create_record_in_database(url, record_metadata, request_headers)
+    (data_files_url, publish_url) = create_record_in_database(url, record_metadata, request_headers)
 
     data_file_index = 0
     for filename in record_data_filenames:
         upload_data_file(record_path, filename, data_file_index, data_files_url, request_headers)
         data_file_index += 1
+
+    return publish_url
 
 
 def create_record_in_database(url, record_metadata, request_headers):
@@ -37,8 +39,10 @@ def create_record_in_database(url, record_metadata, request_headers):
 
     #  Get the files url for the record
     #  e.g., 'https://dev1-big-map-archive.materialscloud.org/api/records/h0zrf-17b65/draft/files'
-    data_files_url = response.json()['links']['files']
-    return data_files_url
+    links = response.json()['links']
+    data_files_url = links['files']
+    publish_url = links['publish']
+    return (data_files_url, publish_url)
 
 
 def upload_data_file(record_path, filename, file_index, files_url, request_headers):
@@ -94,11 +98,22 @@ def complete_data_file_upload(filename, request_headers, file_commit_url):
         raise AssertionError(f"Failed to complete file upload {filename} (code: {response.status_code})")
 
 
+def publish_record(publish_url, request_headers):
+    response = requests.post(
+        publish_url,
+        headers=request_headers['json'],
+        verify=False)
+
+    # Raise an exception if the record could not be published
+    if response.status_code != 202:
+        raise AssertionError(f"Failed to publish record (code: {response.status_code})")
+
+
 if __name__ == '__main__':
     url = "https://dev1-big-map-archive.materialscloud.org/"
 
     # Navigate to 'Applications' > 'Personal access tokens' to create a token if necessary
-    token = "vHeuWbNDspNH0UGUMrmxzQTENpv6996H3GyeVFCOLVVcAudJZBkrMKRnJAWH"
+    token = "VNjlFbSi0NQ5PElPaZMA6mNr5sPvgTh7cVOGqQqRvqt43L2hECu9rHEsrEDr"
 
     record_path = 'record'
 
@@ -128,6 +143,7 @@ if __name__ == '__main__':
     }
 
     try:
-        upload_record(url, record_path, record, request_headers)
+        publish_url = upload_record(url, record_path, record, request_headers)
+        publish_record(publish_url, request_headers)
     except Exception as e:
         print("Oops!", e.__class__, "occurred.")
