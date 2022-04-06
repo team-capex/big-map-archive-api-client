@@ -1,0 +1,41 @@
+{
+  "access": {
+    "record": "public",
+    "files": "public"
+  },
+  "files": {
+    "enabled": true
+  },
+  "metadata": {
+    "creators": [
+      {
+        "person_or_org": {
+          "family_name": "Liot",
+          "given_name": "Francois",
+          "type": "personal"
+        }
+      },
+      {
+        "person_or_org": {
+          "family_name": "Collins",
+          "given_name": "Thomas",
+          "identifiers": [
+            {"scheme": "orcid", "identifier": "0000-0002-1825-0097"}
+          ],
+          "name": "Collins, Thomas",
+          "type": "personal"
+        },
+        "affiliations": [
+          {
+            "id": "01ggx4157",
+            "name": "Entity One"
+          }
+        ]
+      }
+    ],
+    "publication_date": "2022-03-25",
+    "resource_type": { "id": "dataset" },
+    "title": "Resistivity of metal A",
+    "version": "v1"
+  }
+}

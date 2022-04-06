@@ -3,24 +3,26 @@ import json
 import os
 
 
-def upload_record(url, record_path, record, request_headers ):
+def upload_record(url, record_path, record, record_index, request_headers ):
     (record_metadata_filename, record_data_filenames) = record
 
     # Get title, authors, list of attached files...
-    with open(os.path.join(record_path, record_metadata_filename)) as f:
+    print(os.path.join(record_path, str(record_index), record_metadata_filename))
+
+    with open(os.path.join(record_path, str(record_index), record_metadata_filename)) as f:
         record_metadata = json.load(f)
 
     # Create a record in the PostgreSQL database
     # Get the url for the record's attached files
     # e.g., 'https://dev1-big-map-archive.materialscloud.org/api/records/cpbc8-ss975/draft/files'
-    (data_files_url, publish_url) = create_record_in_database(url, record_metadata, request_headers)
+    links = create_record_in_database(url, record_metadata, request_headers)
 
     data_file_index = 0
     for filename in record_data_filenames:
-        upload_data_file(record_path, filename, data_file_index, data_files_url, request_headers)
+        upload_data_file(record_path, filename, data_file_index, record_index, links, request_headers)
         data_file_index += 1
 
-    return publish_url
+    return links
 
 
 def create_record_in_database(url, record_metadata, request_headers):
@@ -37,21 +39,20 @@ def create_record_in_database(url, record_metadata, request_headers):
     if response.status_code != 201:
         raise AssertionError(f"Failed to create record (code: {response.status_code})")
 
-    #  Get the files url for the record
+    #  Get urls for the record
     #  e.g., 'https://dev1-big-map-archive.materialscloud.org/api/records/h0zrf-17b65/draft/files'
     links = response.json()['links']
-    data_files_url = links['files']
-    publish_url = links['publish']
-    return (data_files_url, publish_url)
+    return links
 
 
-def upload_data_file(record_path, filename, file_index, files_url, request_headers):
-    (file_content_url, file_commit_url) = start_data_file_upload(filename, file_index, files_url, request_headers)
-    upload_data_file_content(record_path, filename, request_headers, file_content_url)
+def upload_data_file(record_path, filename, file_index, record_index, links, request_headers):
+    (file_content_url, file_commit_url) = start_data_file_upload(filename, file_index, links, request_headers)
+    upload_data_file_content(record_path, filename, record_index, request_headers, file_content_url)
     complete_data_file_upload(filename, request_headers, file_commit_url)
 
 
-def start_data_file_upload(filename, file_index, files_url, request_headers):
+def start_data_file_upload(filename, file_index, links, request_headers):
+    files_url = links['files']
     payload = json.dumps([{"key": filename}])
 
     response = requests.post(
@@ -73,9 +74,9 @@ def start_data_file_upload(filename, file_index, files_url, request_headers):
     return (file_content_url, file_commit_url)
 
 
-def upload_data_file_content(record_path, filename, request_headers, file_content_url):
+def upload_data_file_content(record_path, filename, record_index, request_headers, file_content_url):
     # Upload the file content by streaming the data
-    with open(os.path.join(record_path, filename), 'rb') as f:
+    with open(os.path.join(record_path, str(record_index), filename), 'rb') as f:
         response = requests.put(
             file_content_url,
             data=f,
@@ -98,7 +99,9 @@ def complete_data_file_upload(filename, request_headers, file_commit_url):
         raise AssertionError(f"Failed to complete file upload {filename} (code: {response.status_code})")
 
 
-def publish_record(publish_url, request_headers):
+def publish_record(links, request_headers):
+    publish_url = links['publish']
+
     response = requests.post(
         publish_url,
         headers=request_headers['json'],
@@ -109,20 +112,33 @@ def publish_record(publish_url, request_headers):
         raise AssertionError(f"Failed to publish record (code: {response.status_code})")
 
 
+def save_to_file(record_path, links_filename, links):
+    filename = os.path.join(record_path, links_filename)
+
+    with open(filename, "r") as f:
+        data = json.load(f)
+
+    data.append(links)
+
+    with open(filename, "w") as f:
+        json.dump(data, f)
+
+
 if __name__ == '__main__':
     url = "https://dev1-big-map-archive.materialscloud.org/"
 
     # Navigate to 'Applications' > 'Personal access tokens' to create a token if necessary
     token = "VNjlFbSi0NQ5PElPaZMA6mNr5sPvgTh7cVOGqQqRvqt43L2hECu9rHEsrEDr"
 
-    record_path = 'record'
+    records_path = 'records'
 
-    # Define a record that you want to upload:
+    # Define records that you want to upload:
     # ('<record metadata json>.json', ['<datafile1>', '<datafile2>'])
-    record = (
-        'record_metadata.json',
-        ['scientific_data.json', 'a.md', 'b.png', 'c.pdf']
-    )
+    records = [
+        ('record_metadata.json', ['scientific_data.json']),
+        ('record_metadata.json', ['scientific_data.json', 'a.md']),
+        ('record_metadata.json', ['scientific_data.json', 'b.png', 'c.pdf'])
+    ]
 
     # HTTP Headers used during requests
     request_headers_json = {
@@ -142,8 +158,25 @@ if __name__ == '__main__':
         "binary": request_headers_binary
     }
 
+    links_filename = 'records_links.json'
+
+    record_index = 0
+
     try:
-        publish_url = upload_record(url, record_path, record, request_headers)
-        publish_record(publish_url, request_headers)
+        # Create a file for storing records' links and raise an exception if file already exists
+        with open(os.path.join(records_path, links_filename), 'x') as f:
+            json_formatted_text = json.dumps([])
+            f.write(json_formatted_text)
+
+        for record in records:
+            record_links = upload_record(url, records_path, record, record_index, request_headers)
+
+            # [Optional] Publish the draft record
+            #publish_record(links, request_headers)
+
+            # Save the record's links to a file
+            save_to_file(records_path, links_filename, record_links)
+
+            record_index += 1
     except Exception as e:
         print("Oops!", e.__class__, "occurred.")

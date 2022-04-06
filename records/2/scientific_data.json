@@ -1,0 +1,36 @@
+{
+    "experiments": [
+        {
+            "id": 0,
+            "description": "By means of...",
+            "parameters": {
+                "temperature": 234,
+                "pressure": 1
+            },
+            "material": "metal C",
+            "property": "resistivity",
+            "value": "9.2e−8"
+        },
+        {
+            "id": 1,
+            "description": "By means of...",
+            "parameters": {
+                "temperature": 285,
+                "pressure": 1
+            },
+            "material": "metal C",
+            "property": "resistivity",
+            "value": "7.3e−8"
+        }
+    ],
+    "simulations": [
+        {
+            "id": 0,
+            "name": "A DFT-based...",
+            "material": "metal C",
+            "property": "resistivity",
+            "value": "6.7e−8"
+        }
+    ],
+    "machine_learning": []
+}

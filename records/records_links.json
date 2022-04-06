@@ -1,0 +1,35 @@
+[
+  {
+    "self": "https://dev1-big-map-archive.materialscloud.org/api/records/dktgk-hyr42/draft",
+    "self_html": "https://dev1-big-map-archive.materialscloud.org/uploads/dktgk-hyr42",
+    "files": "https://dev1-big-map-archive.materialscloud.org/api/records/dktgk-hyr42/draft/files",
+    "record": "https://dev1-big-map-archive.materialscloud.org/api/records/dktgk-hyr42",
+    "record_html": "https://dev1-big-map-archive.materialscloud.org/records/dktgk-hyr42",
+    "publish": "https://dev1-big-map-archive.materialscloud.org/api/records/dktgk-hyr42/draft/actions/publish",
+    "versions": "https://dev1-big-map-archive.materialscloud.org/api/records/dktgk-hyr42/versions",
+    "access_links": "https://dev1-big-map-archive.materialscloud.org/api/records/dktgk-hyr42/access/links",
+    "reserve_doi": "https://dev1-big-map-archive.materialscloud.org/api/records/dktgk-hyr42/draft/pids/doi"
+  },
+  {
+    "self": "https://dev1-big-map-archive.materialscloud.org/api/records/vghbv-61863/draft",
+    "self_html": "https://dev1-big-map-archive.materialscloud.org/uploads/vghbv-61863",
+    "files": "https://dev1-big-map-archive.materialscloud.org/api/records/vghbv-61863/draft/files",
+    "record": "https://dev1-big-map-archive.materialscloud.org/api/records/vghbv-61863",
+    "record_html": "https://dev1-big-map-archive.materialscloud.org/records/vghbv-61863",
+    "publish": "https://dev1-big-map-archive.materialscloud.org/api/records/vghbv-61863/draft/actions/publish",
+    "versions": "https://dev1-big-map-archive.materialscloud.org/api/records/vghbv-61863/versions",
+    "access_links": "https://dev1-big-map-archive.materialscloud.org/api/records/vghbv-61863/access/links",
+    "reserve_doi": "https://dev1-big-map-archive.materialscloud.org/api/records/vghbv-61863/draft/pids/doi"
+  },
+  {
+    "self": "https://dev1-big-map-archive.materialscloud.org/api/records/dy3c7-9n277/draft",
+    "self_html": "https://dev1-big-map-archive.materialscloud.org/uploads/dy3c7-9n277",
+    "files": "https://dev1-big-map-archive.materialscloud.org/api/records/dy3c7-9n277/draft/files",
+    "record": "https://dev1-big-map-archive.materialscloud.org/api/records/dy3c7-9n277",
+    "record_html": "https://dev1-big-map-archive.materialscloud.org/records/dy3c7-9n277",
+    "publish": "https://dev1-big-map-archive.materialscloud.org/api/records/dy3c7-9n277/draft/actions/publish",
+    "versions": "https://dev1-big-map-archive.materialscloud.org/api/records/dy3c7-9n277/versions",
+    "access_links": "https://dev1-big-map-archive.materialscloud.org/api/records/dy3c7-9n277/access/links",
+    "reserve_doi": "https://dev1-big-map-archive.materialscloud.org/api/records/dy3c7-9n277/draft/pids/doi"
+  }
+]
