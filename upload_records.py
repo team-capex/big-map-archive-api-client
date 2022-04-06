@@ -3,6 +3,18 @@ import json
 import os
 
 
+def prepare_file_for_storing_records_links(records_path, links_filename):
+    file_path = os.path.join(records_path, links_filename)
+
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    # Create a file for storing records' links
+    with open(file_path, 'x') as f:
+        json_formatted_text = json.dumps([])
+        f.write(json_formatted_text)
+
+
 def upload_record(url, record_path, record, record_index, request_headers ):
     (record_metadata_filename, record_data_filenames) = record
 
@@ -131,8 +143,9 @@ if __name__ == '__main__':
     token = "VNjlFbSi0NQ5PElPaZMA6mNr5sPvgTh7cVOGqQqRvqt43L2hECu9rHEsrEDr"
 
     records_path = 'records'
+    links_filename = 'records_links.json'
 
-    # Define records that you want to upload:
+    # Specify records that you want to upload:
     # ('<record metadata json>.json', ['<datafile1>', '<datafile2>'])
     records = [
         ('record_metadata.json', ['scientific_data.json']),
@@ -158,16 +171,10 @@ if __name__ == '__main__':
         "binary": request_headers_binary
     }
 
-    links_filename = 'records_links.json'
-
-    record_index = 0
-
     try:
-        # Create a file for storing records' links and raise an exception if file already exists
-        with open(os.path.join(records_path, links_filename), 'x') as f:
-            json_formatted_text = json.dumps([])
-            f.write(json_formatted_text)
+        prepare_file_for_storing_records_links(records_path, links_filename)
 
+        record_index = 0
         for record in records:
             record_links = upload_record(url, records_path, record, record_index, request_headers)
 
