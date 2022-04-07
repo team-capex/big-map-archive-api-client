@@ -107,13 +107,11 @@ def get_content_of_data_file(file, token):
 
 
 def save_to_file(records_path, filename, records_scientific_data):
-    # Save records_scientific_data to a file
     file_path = os.path.join(records_path, filename)
 
     if os.path.exists(file_path):
         os.remove(file_path)
 
-    # Create a file for storing records' links
     with open(file_path, 'x', encoding='utf-8') as f:
         json.dump(records_scientific_data, f, ensure_ascii=False)
 
