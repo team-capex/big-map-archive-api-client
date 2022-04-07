@@ -64,9 +64,9 @@ python retrieve_scientific_data.py
 ```
 
 The script uses `records_links.json` as input and produces `records_scientific_data.json`. The content of this file can be compared with those of:
-- `records/0/records_scientific_data.json` 
-- `records/1/records_scientific_data.json`
-- `records/2/records_scientific_data.json`.
+- `records/0/scientific_data.json` 
+- `records/1/scientific_data.json`
+- `records/2/scientific_data.json`.
 
 Please let us know if you have any questions or comments at [big-map-archive@materialscloud.org](big-map-archive@materialscloud.org).
 
