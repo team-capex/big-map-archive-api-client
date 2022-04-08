@@ -19,9 +19,9 @@ pip install requests
 
 ## Obtain a token
 
-You need to obtain an access token, by creating one here:
+If you do not have a personal access token yet, you can create one by following the link below after a successful login:
 
-- https://dev1-big-map-archive.materialscloud.org/account/settings/applications/tokens/new/
+- https://dev1-big-map-archive.materialscloud.org/account/settings/applications/tokens/new/.
 
 Next, edit [``upload_records.py``](upload_records.py) and [``retrieve_scientific_data.py``](retrieve_scientific_data.py), and add the token:
 
@@ -37,16 +37,13 @@ We created 3 folders:
 - `records/1`
 - `records/2`.
 
-Each folder may correspond to a record in the archive. It contains various files, including:
+Each folder will give a new record in the archive. It contains various files, including:
 - `record_metadata.json`: a JSON file that contains metadata about the record (title, authors...)
 - `scientific_data.json`: a JSON file that contains metadata and data about scientific experiments/simulations.
 
 ## Run the "upload" script
 
-From the 3 folders mentioned above, running the "upload" script creates 3 draft records in the archive, which you can access from:
-- https://dev1-big-map-archive.materialscloud.org/uploads
-
-Note that the file `record_metadata.json` is used to create the record. The other files are simply attached to the record.
+Running the upload script creates 3 draft records in the archive from the 3 folders mentioned above. Note that, while the files `record_metadata.json` are used for filling in "the metadata section of the upload forms", the other files are simply attached to the records.
 
 You can run the upload script using the `python` command:
 
@@ -54,11 +51,17 @@ You can run the upload script using the `python` command:
 python upload_records.py
 ```
 
-A file named `records_links.json` is generated. It stores URLs for the record and its attached files.
+If the execution terminates successfully, you should be able to access the newly-created draft records from the website by following the link below:
+- https://dev1-big-map-archive.materialscloud.org/uploads.
+
+Running the script also generates a file named `records_links.json` in the `records` folder. This file stores URLs for the newly-created records. It can be used to act on these records via the API (e.g., to update a record).
 
 ## Run the "retrieve" script
 
-You can retrieve the content of the 3 `scientific_data.json` files that are stored in the archive as follows:
+The retrieve script harvests the content of the `scientific_data.json` files that were uploaded to the archive and attached to the draft records specified in `records_links.json`. 
+
+You can run it as follows:
+
 ```
 python retrieve_scientific_data.py
 ```
