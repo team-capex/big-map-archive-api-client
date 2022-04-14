@@ -56,7 +56,7 @@ def get_record_data_files(record_links, token):
     response = requests.get(
         data_files_url,
         headers=request_headers,
-        verify=False)
+        verify=True)
 
     if response.status_code != 200:
         raise ValueError(f"Failed to find the list of files for the record (code: {response.status_code})")
@@ -77,7 +77,7 @@ def get_content_of_data_file(file, token):
     response = requests.get(
         file_content_url,
         headers=request_headers,
-        verify=False)
+        verify=True)
 
     if response.status_code != 200:
         raise ValueError(
@@ -93,7 +93,7 @@ def get_content_of_data_file(file, token):
     response = requests.get(
         response.text,
         headers=request_headers,
-        verify=False)
+        verify=True)
 
     if response.status_code != 200:
         raise ValueError(

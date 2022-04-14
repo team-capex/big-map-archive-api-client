@@ -1,1 +1,38 @@
-[{"self": "https://dev1-big-map-archive.materialscloud.org/api/records/sjtp8-af735/draft", "self_html": "https://dev1-big-map-archive.materialscloud.org/uploads/sjtp8-af735", "files": "https://dev1-big-map-archive.materialscloud.org/api/records/sjtp8-af735/draft/files", "record": "https://dev1-big-map-archive.materialscloud.org/api/records/sjtp8-af735", "record_html": "https://dev1-big-map-archive.materialscloud.org/records/sjtp8-af735", "publish": "https://dev1-big-map-archive.materialscloud.org/api/records/sjtp8-af735/draft/actions/publish", "versions": "https://dev1-big-map-archive.materialscloud.org/api/records/sjtp8-af735/versions", "access_links": "https://dev1-big-map-archive.materialscloud.org/api/records/sjtp8-af735/access/links", "reserve_doi": "https://dev1-big-map-archive.materialscloud.org/api/records/sjtp8-af735/draft/pids/doi"}, {"self": "https://dev1-big-map-archive.materialscloud.org/api/records/84jpk-56q25/draft", "self_html": "https://dev1-big-map-archive.materialscloud.org/uploads/84jpk-56q25", "files": "https://dev1-big-map-archive.materialscloud.org/api/records/84jpk-56q25/draft/files", "record": "https://dev1-big-map-archive.materialscloud.org/api/records/84jpk-56q25", "record_html": "https://dev1-big-map-archive.materialscloud.org/records/84jpk-56q25", "publish": "https://dev1-big-map-archive.materialscloud.org/api/records/84jpk-56q25/draft/actions/publish", "versions": "https://dev1-big-map-archive.materialscloud.org/api/records/84jpk-56q25/versions", "access_links": "https://dev1-big-map-archive.materialscloud.org/api/records/84jpk-56q25/access/links", "reserve_doi": "https://dev1-big-map-archive.materialscloud.org/api/records/84jpk-56q25/draft/pids/doi"}, {"self": "https://dev1-big-map-archive.materialscloud.org/api/records/psxj2-wcp22/draft", "self_html": "https://dev1-big-map-archive.materialscloud.org/uploads/psxj2-wcp22", "files": "https://dev1-big-map-archive.materialscloud.org/api/records/psxj2-wcp22/draft/files", "record": "https://dev1-big-map-archive.materialscloud.org/api/records/psxj2-wcp22", "record_html": "https://dev1-big-map-archive.materialscloud.org/records/psxj2-wcp22", "publish": "https://dev1-big-map-archive.materialscloud.org/api/records/psxj2-wcp22/draft/actions/publish", "versions": "https://dev1-big-map-archive.materialscloud.org/api/records/psxj2-wcp22/versions", "access_links": "https://dev1-big-map-archive.materialscloud.org/api/records/psxj2-wcp22/access/links", "reserve_doi": "https://dev1-big-map-archive.materialscloud.org/api/records/psxj2-wcp22/draft/pids/doi"}]
+[
+  {
+    "self": "https://dev1-big-map-archive.materialscloud.org/api/records/d6wt6-kf677/draft",
+    "self_html": "https://dev1-big-map-archive.materialscloud.org/uploads/d6wt6-kf677",
+    "files": "https://dev1-big-map-archive.materialscloud.org/api/records/d6wt6-kf677/draft/files",
+    "record": "https://dev1-big-map-archive.materialscloud.org/api/records/d6wt6-kf677",
+    "record_html": "https://dev1-big-map-archive.materialscloud.org/records/d6wt6-kf677",
+    "publish": "https://dev1-big-map-archive.materialscloud.org/api/records/d6wt6-kf677/draft/actions/publish",
+    "review": "https://dev1-big-map-archive.materialscloud.org/api/records/d6wt6-kf677/draft/review",
+    "versions": "https://dev1-big-map-archive.materialscloud.org/api/records/d6wt6-kf677/versions",
+    "access_links": "https://dev1-big-map-archive.materialscloud.org/api/records/d6wt6-kf677/access/links",
+    "reserve_doi": "https://dev1-big-map-archive.materialscloud.org/api/records/d6wt6-kf677/draft/pids/doi"
+  },
+  {
+    "self": "https://dev1-big-map-archive.materialscloud.org/api/records/c4yzn-az041/draft",
+    "self_html": "https://dev1-big-map-archive.materialscloud.org/uploads/c4yzn-az041",
+    "files": "https://dev1-big-map-archive.materialscloud.org/api/records/c4yzn-az041/draft/files",
+    "record": "https://dev1-big-map-archive.materialscloud.org/api/records/c4yzn-az041",
+    "record_html": "https://dev1-big-map-archive.materialscloud.org/records/c4yzn-az041",
+    "publish": "https://dev1-big-map-archive.materialscloud.org/api/records/c4yzn-az041/draft/actions/publish",
+    "review": "https://dev1-big-map-archive.materialscloud.org/api/records/c4yzn-az041/draft/review",
+    "versions": "https://dev1-big-map-archive.materialscloud.org/api/records/c4yzn-az041/versions",
+    "access_links": "https://dev1-big-map-archive.materialscloud.org/api/records/c4yzn-az041/access/links",
+    "reserve_doi": "https://dev1-big-map-archive.materialscloud.org/api/records/c4yzn-az041/draft/pids/doi"
+  },
+  {
+    "self": "https://dev1-big-map-archive.materialscloud.org/api/records/b5rcc-1tm55/draft",
+    "self_html": "https://dev1-big-map-archive.materialscloud.org/uploads/b5rcc-1tm55",
+    "files": "https://dev1-big-map-archive.materialscloud.org/api/records/b5rcc-1tm55/draft/files",
+    "record": "https://dev1-big-map-archive.materialscloud.org/api/records/b5rcc-1tm55",
+    "record_html": "https://dev1-big-map-archive.materialscloud.org/records/b5rcc-1tm55",
+    "publish": "https://dev1-big-map-archive.materialscloud.org/api/records/b5rcc-1tm55/draft/actions/publish",
+    "review": "https://dev1-big-map-archive.materialscloud.org/api/records/b5rcc-1tm55/draft/review",
+    "versions": "https://dev1-big-map-archive.materialscloud.org/api/records/b5rcc-1tm55/versions",
+    "access_links": "https://dev1-big-map-archive.materialscloud.org/api/records/b5rcc-1tm55/access/links",
+    "reserve_doi": "https://dev1-big-map-archive.materialscloud.org/api/records/b5rcc-1tm55/draft/pids/doi"
+  }
+]

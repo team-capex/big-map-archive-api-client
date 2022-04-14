@@ -50,7 +50,7 @@ def create_record_in_database(url, record_metadata, token):
         f"{url}/api/records",
         data=payload,
         headers=request_headers,
-        verify=False)
+        verify=True)
 
     # Raise an exception if the record could not be created
     if response.status_code != 201:
@@ -82,7 +82,7 @@ def start_data_file_upload(filename, file_index, links, token):
         files_url,
         data=payload,
         headers=request_headers,
-        verify=False)
+        verify=True)
 
     # Raise an exception if the file could not be created
     if response.status_code != 201:
@@ -110,7 +110,7 @@ def upload_data_file_content(record_path, filename, record_index, file_content_u
             file_content_url,
             data=f,
             headers=request_headers,
-            verify=False)
+            verify=True)
 
     # Raise an exception if the file content could not be uploaded
     if response.status_code != 200:
@@ -127,7 +127,7 @@ def complete_data_file_upload(filename, file_commit_url, token):
     response = requests.post(
         file_commit_url,
         headers=request_headers,
-        verify=False)
+        verify=True)
 
     # Raise an exception if the file content could not be uploaded
     if response.status_code != 200:
@@ -146,7 +146,7 @@ def publish_record(links, token):
     response = requests.post(
         publish_url,
         headers=request_headers,
-        verify=False)
+        verify=True)
 
     # Raise an exception if the record could not be published
     if response.status_code != 202:
