@@ -166,7 +166,7 @@ def save_to_file(record_path, links_filename, links):
 
 
 if __name__ == '__main__':
-    url = "https://dev1-big-map-archive.materialscloud.org/"
+    url = "https://archive.big-map.eu/"
 
     # Navigate to 'Applications' > 'Personal access tokens' to create a token if necessary
     token = "<replace by a personal token>"
@@ -178,9 +178,10 @@ if __name__ == '__main__':
     # ('<record metadata json>.json', ['<datafile1>', '<datafile2>'])
     records = [
         ('record_metadata.json', ['scientific_data.json']),
-        ('record_metadata.json', ['scientific_data.json', 'a.md']),
-        ('record_metadata.json', ['scientific_data.json', 'b.png', 'c.pdf'])
+        ('record_metadata.json', ['scientific_data.json', 'dummy_data.md'])
     ]
+
+    publish = True
 
     logger = logging.getLogger()
     logger.addHandler(logging.StreamHandler())
@@ -194,8 +195,9 @@ if __name__ == '__main__':
             logger.info('----------Start uploading record ' + str(record_index) + '----------')
             record_links = upload_record(url, records_path, record, record_index, token)
 
-            # [Optional] Publish the draft record
-            # publish_record(links, request_headers)
+            if publish:
+                # Publish the draft record
+                publish_record(record_links, token)
 
             # Save the record's links to a file
             save_to_file(records_path, links_filename, record_links)

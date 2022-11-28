@@ -33,9 +33,9 @@
         ]
       }
     ],
-    "publication_date": "2022-03-25",
+    "publication_date": "2022-11-28",
     "resource_type": { "id": "dataset" },
-    "title": "Resistivity of metal B",
+    "title": "Test of resistivity of metal B",
     "version": "v1"
   }
 }
