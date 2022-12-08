@@ -1,6 +1,6 @@
 # BIG-MAP Archive REST API Examples
 
-Following are examples of how to programmatically 
+Following are examples of how to programmatically
 - create and publish records to BIG-MAP Archive (https://archive.big-map.eu/).
 
 Note that the API documentation can be found at https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records.
@@ -51,3 +51,15 @@ Please let us know if you have any questions or comments at [big-map-archive@mat
 
 
 
+## Not clear
+- In the metadata, the `version` is specified, however, the `version` should be generated automatically when one upload and generate a new version.
+- What is the `publication_date`? Is it the time the record get published? This should be generated automatically.
+
+## Todo
+- Show a full example (template) for all possible keys, e.g. How to add reference? How to choose the lincense?
+
+- How to update a record?
+
+## Improvement
+- We can create a python package to do this. Upload to Pypi, thus the user can easily install it.
+- Support cli.
