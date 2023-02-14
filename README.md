@@ -5,7 +5,7 @@ Below is an example of how to programmatically <b>create and share records</b> o
 ## Demo archive
 
 In addition to the main production archive (with daily backups), 
-a [demo archive](https://big-map-archive-demo.materialscloud.org/) is available so that you can practice creating and managing records via the API. 
+a [demo archive](https://big-map-archive-demo.materialscloud.org/) is available so that you can practice creating and managing records via the application programming interface (API). 
 For testing purposes, use the demo archive.
 
 ## User accounts
@@ -59,7 +59,7 @@ Running the script also generates a file named `records_links.json` in the `reco
 
 ## Documentation for the API
 
-A documentation for the application programming interface (including its endpoints for downloading files, searching for records, etc) is available on the [InvenioRDM website](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records).
+A documentation for the API (including its endpoints for downloading files, searching for records, etc) is available on the [InvenioRDM website](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records).
 
 ## Support
 
