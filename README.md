@@ -1,6 +1,6 @@
 # Consuming BIG-MAP Archive's REST API
 
-Below is an example of how to programmatically <b>create and share records</b> on [BIG-MAP Archive](https://archive.big-map.eu/) via its application programming interface (API) using a Python script.
+Below is an example of how to programmatically <b>create and share records</b> on [BIG-MAP Archive](https://archive.big-map.eu/) via its [application programming interface](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records) (API) using a Python script.
 
 ## Demo archive
 
@@ -42,6 +42,15 @@ Each folder will give a new record in the archive. It contains various files, in
 - `record_metadata.json`: a JSON file that contains metadata about the record (title, authors...)
 - `scientific_data.json`: a JSON file that contains metadata and data about scientific experiments/simulations.
 
+## Select the targeted archive
+
+Edit the script and select the archive to send your requests to:
+
+```python
+#url = "https://archive.big-map.eu/"
+url = "https://big-map-archive-demo.materialscloud.org/"
+```
+
 ## Create and share records
 
 Running the script `create_and_share_records.py` creates and shares 2 records on the archive from the 2 folders mentioned above. 
@@ -56,10 +65,6 @@ python create_and_share_records.py
 If the execution terminates successfully, you should be able to [access the newly-shared records](https://big-map-archive-demo.materialscloud.org/search).
 
 Running the script also generates a file named `records_links.json` in the `records` folder. This file stores URLs for the newly-created records. It can be used to act on these records via the API (e.g., to update a record).
-
-## Documentation for the API
-
-A documentation for the API (including its endpoints for downloading files, searching for records, etc) is available on the [InvenioRDM website](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records).
 
 ## Support
 
