@@ -1,11 +1,11 @@
 # Consuming BIG-MAP Archive's REST API
 
-Below is an example of how to programmatically <b>create and share records</b> on [BIG-MAP Archive](https://archive.big-map.eu/).
+Below is an example of how to programmatically <b>create and share records</b> on [BIG-MAP Archive](https://archive.big-map.eu/) via its application programming interface (API) using a Python script.
 
 ## Demo archive
 
 In addition to the main production archive (with daily backups), 
-a [demo archive](https://big-map-archive-demo.materialscloud.org/) is available so that you can practice creating and managing records via the application programming interface (API). 
+a [demo archive](https://big-map-archive-demo.materialscloud.org/) is available so that you can practice creating and managing records via its API. 
 For testing purposes, use the demo archive.
 
 ## User accounts
