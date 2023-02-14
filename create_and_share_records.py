@@ -25,7 +25,7 @@ def upload_record(url, record_path, record, record_index, token):
 
     # Create a record in the PostgreSQL database
     # Get the url for the record's attached files
-    # e.g., 'https://dev1-big-map-archive.materialscloud.org/api/records/cpbc8-ss975/draft/files'
+    # e.g., '/api/records/cpbc8-ss975/draft/files'
     links = create_record_in_database(url, record_metadata, token)
 
     data_file_index = 0
@@ -57,7 +57,7 @@ def create_record_in_database(url, record_metadata, token):
         raise ValueError(f"Failed to create record (code: {response.status_code})")
 
     #  Get urls for the record
-    #  e.g., 'https://dev1-big-map-archive.materialscloud.org/api/records/h0zrf-17b65/draft/files'
+    #  e.g., '/api/records/h0zrf-17b65/draft/files'
     links = response.json()['links']
     return links
 
@@ -89,8 +89,8 @@ def start_data_file_upload(filename, file_index, links, token):
         raise ValueError(f"Failed to create record (code: {response.status_code})")
 
     # Get the file content url and the file commit url
-    # e.g., 'https://dev1-big-map-archive.materialscloud.org/api/records/eqcks-b1q35/draft/files/scientific_data.json/content'
-    # e.g, 'https://dev1-big-map-archive.materialscloud.org/api/records/eqcks-b1q35/draft/files/scientific_data.json/commit'
+    # e.g., '/api/records/eqcks-b1q35/draft/files/scientific_data.json/content'
+    # e.g, '/api/records/eqcks-b1q35/draft/files/scientific_data.json/commit'
     file_links = response.json()['entries'][file_index]['links']
     file_content_url = file_links['content']
     file_commit_url = file_links['commit']
@@ -166,7 +166,8 @@ def save_to_file(record_path, links_filename, links):
 
 
 if __name__ == '__main__':
-    url = "https://archive.big-map.eu/"
+    #url = "https://archive.big-map.eu/"
+    url = "https://big-map-archive-demo.materialscloud.org/"
 
     # Navigate to 'Applications' > 'Personal access tokens' to create a token if necessary
     token = "<replace by a personal token>"
