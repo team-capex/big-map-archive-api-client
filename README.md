@@ -5,7 +5,7 @@ Below is an example of how to programmatically <b>create and share records</b> o
 ## Demo archive
 
 In addition to the main production archive (with daily backups), 
-a [demo archive](https://big-map-archive-demo.materialscloud.org/) is available so that you can practice creating and managing records via its API. 
+a [demo archive](https://big-map-archive-demo.materialscloud.org/) is available so that you can practice creating and managing records via an API. 
 For testing purposes, use the demo archive.
 
 ## User accounts
