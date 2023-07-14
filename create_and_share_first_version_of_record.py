@@ -7,8 +7,7 @@ import errno
 
 def check_input_files_exist(record_metadata_file_path, data_files_paths):
     """
-    Raises an exception if one of the files specified by the variables record_metadata_file and data_files
-    is missing from the input folder
+    Raises an exception if a file specified by an argument is missing from the input folder
     """
     if not os.path.isfile(record_metadata_file_path):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), record_metadata_file_path)
@@ -19,8 +18,8 @@ def check_input_files_exist(record_metadata_file_path, data_files_paths):
 
 def create_draft_record(url, token, record_metadata_file_path):
     """
-    Creates the first version of a record
-    At this stage, the version is a draft, i.e., it remains private to its owner
+    Creates a record, which remains private to its owner, from a file
+    Raises an exception if the record could not be created
     """
     # Create the payload from the record's metadata file (title, authors...)
     with open(record_metadata_file_path, 'r') as f:
@@ -53,7 +52,8 @@ def create_draft_record(url, token, record_metadata_file_path):
 
 def start_file_uploads(url, token, record_id, data_files):
     """
-    Updates record's metadata by specifying the files that should be attached to the record
+    Updates a record's metadata by specifying the files that should be attached to it
+    Raises an exception if the record's metadata could not be updated
     """
     # Create the payload specifying the files to be attached to the record
     filename_vs_key = []
@@ -74,13 +74,14 @@ def start_file_uploads(url, token, record_id, data_files):
         headers=request_headers,
         verify=True)
 
-    # Raise an exception if the file could not be created
+    # Raise an exception if the record could not be updated
     if response.status_code != 201:
-        raise ValueError(f"Failed to create record (code: {response.status_code})")
+        raise ValueError(f"Failed to update the record (code: {response.status_code})")
 
 def upload_file_content(url, token, record_id, basedir, input_folder, filename):
     """
-    Uploads the file content by streaming the data
+    Uploads a file's content
+    Raise an exception if the file's content could not be uploaded
     """
     request_headers = {
         "Accept": "application/json",
@@ -96,14 +97,15 @@ def upload_file_content(url, token, record_id, basedir, input_folder, filename):
             verify=True
         )
 
-    # Raise an exception if the file content could not be uploaded
+    # Raise an exception if the file's content could not be uploaded
     if response.status_code != 200:
         raise ValueError(f"Upload of {filename}'s content failed (code: {response.status_code})")
 
 
 def complete_file_upload(url, token, record_id, filename):
     """
-    Completes a file upload
+    Completes the upload of a file's content
+    Raises an exception if the upload of the file's content could not be completed
     """
     request_headers = {
         "Accept": "application/json",
@@ -116,13 +118,14 @@ def complete_file_upload(url, token, record_id, filename):
         headers=request_headers,
         verify=True)
 
-    # Raise an exception if the file upload could not be completed
+    # Raise an exception if the upload of the file's content could not be completed
     if response.status_code != 200:
         raise ValueError(f"Completing the upload of {filename}'s content failed (code: {response.status_code})")
 
 def publish_draft_record(url, token, record_id):
     """
-    Shares the record with all users of the archive
+    Shares a draft with all users of the archive
+    Raises an exception if the draft could not be shared
     """
     request_headers = {
         "Accept": "application/json",
@@ -135,32 +138,27 @@ def publish_draft_record(url, token, record_id):
         headers=request_headers,
         verify=True)
 
-    # Raise an exception if the draft record could not be published
+    # Raise an exception if the draft could not be shared
     if response.status_code != 202:
         raise ValueError(f"Failed to publish record (code: {response.status_code})")
 
 if __name__ == '__main__':
     # Select an archive
-    #url = "https://archive.big-map.eu/"
-    url = "https://big-map-archive-demo.materialscloud.org/"
+    #url = 'https://archive.big-map.eu/'
+    url = 'https://big-map-archive-demo.materialscloud.org/'
 
     # Navigate to 'Applications' > 'Personal access tokens' to create a token if necessary
-    #token = "<replace by a personal token>"
-    token = '5wh90fodtljtXEHkEX9YN0QCKKDdurtrgelyetutUsaKcZkNYV1XLIsm8IFf'
+    token = '<replace by a personal token>'
 
     # Specify whether to share the record and its files with other users
     publish = True
 
-    # Folders
+    # Folder
     input_folder = 'input'
-    output_folder = 'output'
 
     # Input files
     record_metadata_file = 'record_metadata.json' # Contains the title, the list of authors...
     data_files = ['a.json', 'b.png', 'c.pdf'] # Files to attach to the record
-
-    # Output files
-    links_file = 'records_links.json' # Will contain links to the record, the uploaded files...
 
     logger = logging.getLogger()
     logger.addHandler(logging.StreamHandler())
@@ -175,23 +173,23 @@ if __name__ == '__main__':
         check_input_files_exist(record_metadata_file_path, data_files_paths)
         logger.info('Input files exist')
 
-        # Create a draft record on the archive
+        # Create a draft on the archive
         # Get the record's id (e.g., 'cpbc8-ss975')
         record_id = create_draft_record(url, token, record_metadata_file_path)
         logger.info(f'Draft record with id={record_id} created with success')
 
-        # Update record's metadata with the names of the data files to be attached to the record
+        # Update the record's metadata with the names of the data files to be attached to the record
         start_file_uploads(url, token, record_id, data_files)
         logger.info('Data files specified with success')
 
-        # For each data file, upload its content to the object store
+        # For each data file, upload its content
         for file in data_files:
             upload_file_content(url, token, record_id, basedir, input_folder, file)
             complete_file_upload(url, token, record_id, file)
 
         logger.info('Data files uploaded with success')
 
-        # Share the record with all archive's users
+        # Share the draft with all archive's users
         if publish:
             publish_draft_record(url, token, record_id)
 
