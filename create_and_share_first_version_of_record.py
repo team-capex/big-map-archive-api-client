@@ -81,7 +81,7 @@ def start_file_uploads(url, token, record_id, data_files):
 def upload_file_content(url, token, record_id, basedir, input_folder, filename):
     """
     Uploads a file's content
-    Raise an exception if the file's content could not be uploaded
+    Raises an exception if the file's content could not be uploaded
     """
     request_headers = {
         "Accept": "application/json",
