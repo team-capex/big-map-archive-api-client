@@ -143,22 +143,27 @@ def publish_draft_record(url, token, record_id):
         raise ValueError(f"Failed to publish record (code: {response.status_code})")
 
 if __name__ == '__main__':
+    # -----------------Please check the information below-----------------
     # Select an archive
     #url = 'https://archive.big-map.eu/'
     url = 'https://big-map-archive-demo.materialscloud.org/'
 
-    # Navigate to 'Applications' > 'Personal access tokens' to create a token if necessary
+    # Specify a personal access token for the selected archive
+    # If you need a valid token, navigate to 'Applications' > 'Personal access tokens'
     token = '<replace by a personal token>'
 
-    # Specify whether to share the record and its files with other users
-    publish = True
-
-    # Folder
+    # Specify the folder where your input files are located
     input_folder = 'input'
 
-    # Input files
+    # Specify your input files
     record_metadata_file = 'record_metadata.json' # Contains the title, the list of authors...
-    data_files = ['a.json', 'b.png', 'c.pdf'] # Files to attach to the record
+    data_files = ['a.json', 'b.png', 'c.pdf'] # Data files to be attached to the record
+
+    # Specify whether the record should
+    # - be shared with all the archive's users (publish = True) or
+    # - remain private to you (publish = False)
+    publish = True
+    # --------------------------------------------------------------------
 
     logger = logging.getLogger()
     logger.addHandler(logging.StreamHandler())
