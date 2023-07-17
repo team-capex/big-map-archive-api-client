@@ -3,10 +3,10 @@ import requests
 import os
 import json
 
-def get_record(url, token, id):
+def get_record_metadata(url, token, id):
     """
     Gets the metadata of a shared record
-    Raises an exception if the metadata of the record could not be obtained
+    Raises an exception if the metadata could not be obtained
     """
     request_headers = {
         "Accept": "application/json",
@@ -26,6 +26,36 @@ def get_record(url, token, id):
     record_metadata = json.loads(response.text)
     return record_metadata
 
+def get_records_metadata(url, token, response_size):
+    """
+    Gets the metadata of all shared records
+    Raises an exception if the metadata could not be obtained
+    """
+    request_headers = {
+        "Accept": "application/json",
+        "Content-type": "application/json",
+        "Authorization": f"Bearer {token}"
+    }
+
+    response = requests.get(
+        f"{url}/api/records?allversions=true&size={response_size}",
+        headers=request_headers,
+        verify=True)
+
+    # Raise an exception if the metadata could not be obtained
+    if response.status_code != 200:
+        raise ValueError(f"Failed request (code: {response.status_code})")
+
+    records_metadata = json.loads(response.text)
+    return records_metadata
+
+def create_folder(folder_path):
+    """
+    Creates a folder if it does not exist
+    """
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
 def export_to_file(file_path, data):
     """
     Exports data to file
@@ -35,40 +65,62 @@ def export_to_file(file_path, data):
 
 
 if __name__ == '__main__':
-    # Select an archive
-    #url = "https://archive.big-map.eu/"
-    url = "https://big-map-archive-demo.materialscloud.org/"
+    # -----------------Users: verify the information below-----------------
+    # Specify the targeted archive:
+    # - the main archive (main = True)
+    # - the demo archive (main = False)
+    main = True
 
-    # Navigate to 'Applications' > 'Personal access tokens' to create a token if necessary
-    #token = "<replace by a personal token>"
-    token = '1A2GC4qgIRQmEwdFGjNr0jA6EUJ44XOg714MNdFpatmbZqyvqN3Z7soqTLDj'
+    # Specify a personal access token for the selected archive
+    # If you need a valid token, navigate to 'Applications' > 'Personal access tokens'
+    #token = '1A2GC4qgIRQmEwdFGjNr0jA6EUJ44XOg714MNdFpatmbZqyvqN3Z7soqTLDj'
+    token = '9MAtG7UgWt1VX9H3RtE3RGBIvvt1RZbwsVXbfNeqMO6lRSJvZjuiqkL7jZIO'
 
-    # Specify whether you are interested in
-    #   - one shared record (single_record = True) or
-    #   - all shared records (single_record = False)
-    single_record = True
-
-    # If single_record = True, specify the record's id (e.g., 'j6hfj-bsb82')
-    # If single_record = False, the value of record_id is ignored by the script
-    record_id = 'j6hfj-bsb82'
-
-    # Folders
+    # Specify the folder where your output files are located
     output_folder = 'output'
 
-    # Output file
-    record_metadata_file = f'record_metadata.json'
+    # Specify whether you wish to retrieve the metadata of
+    # - a single record that is shared on the archive (single_record = True) or
+    # - all records that are shared on the archive (single_record = False)
+    single_record = True
+
+    # If you wish to retrieve the metadata of a single record, specify its id
+    record_id = 'jenf1-ng292'
+
+    # ---------------Users: do not modify the information below---------------
+    # Archives' urls
+    main_archive_url = 'https://archive.big-map.eu/'
+    demo_archive_url = 'https://big-map-archive-demo.materialscloud.org/'
+    url = demo_archive_url
+
+    # Max number of items in requests' responses
+    response_size = int(1e6)
 
     logger = logging.getLogger()
     logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.INFO)
 
     try:
-        record_metadata = get_record(url, token, record_id)
-        logger.info(f'Metadata of {record_id} obtained with success')
-
         basedir = os.path.abspath(os.path.dirname(__file__))
-        record_metadata_file_path = os.path.join(basedir, output_folder, record_metadata_file)
-        export_to_file(record_metadata_file_path, record_metadata)
-        logger.info(f'Metadata exported to {record_metadata_file} with success')
+
+        if main:
+            url = main_archive_url
+
+        if single_record:
+            metadata = get_record_metadata(url, token, record_id)
+            logger.info(f'Metadata of {record_id} obtained with success')
+            output_file = f'{record_id}.json'
+        else:
+            metadata = get_records_metadata(url, token, response_size)
+            logger.info(f'Metadata of all records obtained with success')
+            output_file = 'all_shared_records.json'
+
+        output_folder_path = os.path.join(basedir, output_folder)
+        create_folder(output_folder_path)
+
+        output_file_path = os.path.join(basedir, output_folder, output_file)
+        export_to_file(output_file_path, metadata)
+        logger.info(f'Metadata exported to {output_file} with success')
+
     except Exception as e:
         logger.error('Error occurred: ' + str(e))
