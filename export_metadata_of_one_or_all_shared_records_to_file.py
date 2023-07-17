@@ -69,12 +69,11 @@ if __name__ == '__main__':
     # Specify the targeted archive:
     # - the main archive (main = True)
     # - the demo archive (main = False)
-    main = True
+    main = False
 
     # Specify a personal access token for the selected archive
     # If you need a valid token, navigate to 'Applications' > 'Personal access tokens'
-    #token = '1A2GC4qgIRQmEwdFGjNr0jA6EUJ44XOg714MNdFpatmbZqyvqN3Z7soqTLDj'
-    token = '9MAtG7UgWt1VX9H3RtE3RGBIvvt1RZbwsVXbfNeqMO6lRSJvZjuiqkL7jZIO'
+    token = '<replace_with_token>'
 
     # Specify the folder where your output files are located
     output_folder = 'output'
@@ -82,10 +81,11 @@ if __name__ == '__main__':
     # Specify whether you wish to retrieve the metadata of
     # - a single record that is shared on the archive (single_record = True) or
     # - all records that are shared on the archive (single_record = False)
-    single_record = True
+    single_record = False
 
     # If you wish to retrieve the metadata of a single record, specify its id
-    record_id = 'jenf1-ng292'
+    # e.g., jenf1-ng292
+    record_id = '<replace_with_id>'
 
     # ---------------Users: do not modify the information below---------------
     # Archives' urls
