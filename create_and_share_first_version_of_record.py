@@ -5,10 +5,10 @@ import requests
 import errno
 
 
-def check_token_validity(url, token):
+def check_api_access(url, token):
     """
-    Sends a GET request to the archive to check the token's validity
-    If the token is invalid, raises a HTTPError exception with status code 403 and reason FORBIDDEN
+    Sends a GET request to test access to an api's endpoint
+    If the token is invalid, an HTTPError exception with the status code 403 and the reason 'FORBIDDEN' is raised
     """
     request_headers = {
         "Accept": "application/json",
@@ -38,16 +38,16 @@ def check_input_file_exists(initial_metadata_file_path):
     if not os.path.isfile(initial_metadata_file_path):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), initial_metadata_file_path)
 
-def create_draft_record(url, token, record_metadata_file_path):
+def create_draft_record(url, token, input_metadata_file_path):
     """
-    Creates a record, which remains private to its owner, from a file
-    Raises an exception if the record could not be created
+    Creates a record, which remains private to its owner, from the initial metadata file
+    Raises an HTTPError exception if the request to create the record fails
     """
     # Create the payload from the record's metadata file (title, authors...)
-    with open(record_metadata_file_path, 'r') as f:
-        record_metadata = json.load(f)
+    with open(input_metadata_file_path, 'r') as f:
+        input_metadata = json.load(f)
 
-    payload = json.dumps(record_metadata)
+    payload = json.dumps(input_metadata)
 
     request_headers = {
         "Accept": "application/json",
@@ -73,7 +73,7 @@ def create_draft_record(url, token, record_metadata_file_path):
 
 def get_data_files(input_folder_path, record_metadata_file):
     """
-    Returns the list of the files in the input folder, except for the metadata file
+    Returns the filenames in the input folder, except for the metadata file
     """
     all_files = [item for item in os.listdir(input_folder_path) if os.path.isfile(os.path.join(input_folder_path, item))]
     data_files = [item for item in all_files if item != record_metadata_file]
@@ -204,7 +204,7 @@ if __name__ == '__main__':
         if main:
             url = main_archive_url
 
-        check_token_validity(url, token)
+        check_api_access(url, token)
 
         basedir = os.path.abspath(os.path.dirname(__file__))
         input_folder_path = os.path.join(basedir, input_folder)
