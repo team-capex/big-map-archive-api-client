@@ -7,7 +7,8 @@ import errno
 
 def check_token_validity(url, token):
     """
-    ???
+    Sends a GET request to the archive to check the token's validity
+    If the token is invalid, raises a HTTPError exception with status code 403 and reason FORBIDDEN
     """
     request_headers = {
         "Accept": "application/json",
