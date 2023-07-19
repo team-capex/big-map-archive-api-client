@@ -165,8 +165,7 @@ if __name__ == '__main__':
 
     # Specify a personal access token for the selected archive
     # If you need a valid token, navigate to 'Applications' > 'Personal access tokens'
-    #token = '<replace_with_token>'
-    token = '88j0czz2YnArs68xh8xv898h1IpulGCy4T7Dlh55ySkbKg7elBHSWNnpW1Oq'
+    token = '<replace_with_token>'
 
     # Specify the folder where your input files are located
     input_folder = 'input'
@@ -176,7 +175,7 @@ if __name__ == '__main__':
     record_metadata_file = 'record_metadata.json'
 
     # Specify whether you wish to share the record with all archive's users
-    publish = True
+    publish = False
 
     # ---------------Users: do not modify the information below---------------
     # Archives' urls
