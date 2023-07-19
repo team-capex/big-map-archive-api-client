@@ -24,30 +24,31 @@ def check_api_access(url, token):
     # Raise an exception if there is an HTTP error
     response.raise_for_status()
 
-def check_input_folder_exists(input_folder_path):
+def check_folder_exists(folder_path):
     """
-    Raises an exception if the input folder does not exist
+    Raises an exception if the folder does not exist
     """
-    if not os.path.exists(input_folder_path):
-        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), input_folder_path)
+    if not os.path.exists(folder_path):
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), folder_path)
 
-def check_input_file_exists(initial_metadata_file_path):
+def check_file_exists(file_path):
     """
-    Raises an exception if the initial metadata file is missing from the input folder
+    Raises an exception if the file does not exist
     """
-    if not os.path.isfile(initial_metadata_file_path):
-        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), initial_metadata_file_path)
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), file_path)
 
-def create_draft_record(url, token, input_metadata_file_path):
+def create_draft(url, token, metadata_file_path):
     """
-    Creates a record, which remains private to its owner, from the initial metadata file
+    Creates a record, which remains private to its owner, from a file
     Raises an HTTPError exception if the request to create the record fails
+    Returns the id of the newly created record
     """
-    # Create the payload from the record's metadata file (title, authors...)
-    with open(input_metadata_file_path, 'r') as f:
-        input_metadata = json.load(f)
+    # Create the payload from the file (title, authors...)
+    with open(metadata_file_path, 'r') as f:
+        metadata = json.load(f)
 
-    payload = json.dumps(input_metadata)
+    payload = json.dumps(metadata)
 
     request_headers = {
         "Accept": "application/json",
@@ -55,40 +56,36 @@ def create_draft_record(url, token, input_metadata_file_path):
         "Authorization": f"Bearer {token}"
     }
 
-    # Send POST request
-    # with "verify=True" in production so that HTTPS requests verify SSL certificates
     response = requests.post(
         f'{url}/api/records',
         data=payload,
         headers=request_headers,
         verify=True)
 
-    # Raise an exception if there is an HTTP error
     response.raise_for_status()
 
-    #  Get record's id
     record_url = response.json()['links']['record']
     record_id = record_url.split('/api/records/')[-1]
     return record_id
 
-def get_data_files(input_folder_path, record_metadata_file):
+def get_data_files(input_folder_path, metadata_file):
     """
     Returns the filenames in the input folder, except for the metadata file
     """
     all_files = [item for item in os.listdir(input_folder_path) if os.path.isfile(os.path.join(input_folder_path, item))]
-    data_files = [item for item in all_files if item != record_metadata_file]
+    data_files = [item for item in all_files if item != metadata_file]
     return data_files
 
-def start_file_uploads(url, token, record_id, filenames):
+def start_file_uploads(url, token, record_id, data_files):
     """
     Updates a record's metadata by specifying the files that should be attached to it
-    Raises an exception if the record's metadata could not be updated
+    Raises an HTTPError exception if the request to update the record fails
     """
     # Create the payload specifying the files to be attached to the record
     filename_vs_key = []
 
-    for filename in filenames:
-        filename_vs_key.append({'key': filename})
+    for f in data_files:
+        filename_vs_key.append({'key': f})
 
     payload = json.dumps(filename_vs_key)
 
@@ -104,13 +101,12 @@ def start_file_uploads(url, token, record_id, filenames):
         headers=request_headers,
         verify=True)
 
-    # Raise an exception if there is an HTTP error
     response.raise_for_status()
 
-def upload_file_content(url, token, record_id, basedir, input_folder, filename):
+def upload_file_content(url, token, record_id, data_file_path, data_file):
     """
     Uploads a file's content
-    Raises an exception if the file's content could not be uploaded
+    Raises an HTTPError exception if the request to upload the file's content fails
     """
     request_headers = {
         "Accept": "application/json",
@@ -118,22 +114,21 @@ def upload_file_content(url, token, record_id, basedir, input_folder, filename):
         "Authorization": f"Bearer {token}"
     }
 
-    with open(os.path.join(basedir, input_folder, filename), 'rb') as f:
+    with open(data_file_path, 'rb') as f:
         response = requests.put(
-            f'{url}/api/records/{record_id}/draft/files/{filename}/content',
+            f'{url}/api/records/{record_id}/draft/files/{data_file}/content',
             data=f,
             headers=request_headers,
             verify=True
         )
 
-    # Raise an exception if there is an HTTP error
     response.raise_for_status()
 
 
-def complete_file_upload(url, token, record_id, filename):
+def complete_file_upload(url, token, record_id, data_file):
     """
     Completes the upload of a file's content
-    Raises an exception if the upload of the file's content could not be completed
+    Raises an HTTPError exception if the request to complete the upload of the file's content fails
     """
     request_headers = {
         "Accept": "application/json",
@@ -142,17 +137,16 @@ def complete_file_upload(url, token, record_id, filename):
     }
 
     response = requests.post(
-        f'{url}/api/records/{record_id}/draft/files/{filename}/commit',
+        f'{url}/api/records/{record_id}/draft/files/{data_file}/commit',
         headers=request_headers,
         verify=True)
 
-    # Raise an exception if there is an HTTP error
     response.raise_for_status()
 
 def publish_draft_record(url, token, record_id):
     """
     Shares a draft with all users of the archive
-    Raises an exception if the draft could not be shared
+    Raises an HTTPError exception if the request to share the draft fails
     """
     request_headers = {
         "Accept": "application/json",
@@ -165,7 +159,6 @@ def publish_draft_record(url, token, record_id):
         headers=request_headers,
         verify=True)
 
-    # Raise an exception if there is an HTTP error
     response.raise_for_status()
 
 
@@ -196,28 +189,28 @@ if __name__ == '__main__':
     demo_archive_url = 'https://big-map-archive-demo.materialscloud.org/'
     url = demo_archive_url
 
+    if main:
+        url = main_archive_url
+
     logger = logging.getLogger()
     logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.INFO)
 
     try:
-        if main:
-            url = main_archive_url
-
         check_api_access(url, token)
 
         basedir = os.path.abspath(os.path.dirname(__file__))
         input_folder_path = os.path.join(basedir, input_folder)
-        check_input_folder_exists(input_folder_path)
+        check_folder_exists(input_folder_path)
         logger.info('Input folder exists')
 
         initial_metadata_file_path = os.path.join(basedir, input_folder, initial_metadata_file)
-        check_input_file_exists(initial_metadata_file_path)
+        check_file_exists(initial_metadata_file_path)
         logger.info(f'Input file {initial_metadata_file} exists')
 
         # Create a draft on the archive from the content of initial_metadata_file
         # Get the id of the newly created record (e.g., 'cpbc8-ss975')
-        record_id = create_draft_record(url, token, initial_metadata_file_path)
+        record_id = create_draft(url, token, initial_metadata_file_path)
         logger.info(f'Draft record with id={record_id} created with success')
 
         # Update the record's metadata with the names of the data files that will be attached to the record
@@ -228,9 +221,10 @@ if __name__ == '__main__':
         logger.info('Data files specified with success')
 
         # For each data file, upload its content
-        for file in data_files:
-            upload_file_content(url, token, record_id, basedir, input_folder, file)
-            complete_file_upload(url, token, record_id, file)
+        for data_file in data_files:
+            data_file_path = os.path.join(basedir, input_folder, data_file)
+            upload_file_content(url, token, record_id, data_file_path, data_file)
+            complete_file_upload(url, token, record_id, data_file)
 
         logger.info('Data files uploaded with success')
 
