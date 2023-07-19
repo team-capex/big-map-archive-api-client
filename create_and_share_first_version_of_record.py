@@ -16,8 +16,6 @@ def check_token_validity(url, token):
         "Authorization": f"Bearer {token}"
     }
 
-    # Send POST request
-    # with "verify=True" in production so that HTTPS requests verify SSL certificates
     response = requests.get(
         f'{url}/api/records?size=1',
         headers=request_headers,
