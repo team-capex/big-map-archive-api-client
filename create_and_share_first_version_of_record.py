@@ -5,16 +5,28 @@ import requests
 import errno
 
 
-def check_input_files_exist(record_metadata_file_path, data_files_paths):
+def check_input_folder_exists(input_folder_path):
     """
-    Raises an exception if a file specified by an argument is missing from the input folder
+    Raises an exception if the input folder does not exist
+    """
+    if not os.path.exists(input_folder_path):
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), input_folder_path)
+
+def check_input_file_exists(input_folder_path):
+    """
+    Raises an exception if the record metadata file is missing from the input folder
     """
     if not os.path.isfile(record_metadata_file_path):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), record_metadata_file_path)
 
-    for p in data_files_paths:
-        if not os.path.isfile(p):
-            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), p)
+def get_data_files(input_folder_path, record_metadata_file):
+    """
+    Returns the list of the files in the input folder, except the metadata file
+    """
+    all_files = [item for item in os.listdir(input_folder_path) if os.path.isfile(os.path.join(input_folder_path, item))]
+    data_files = [item for item in all_files if item != record_metadata_file]
+    return data_files
+
 
 def create_draft_record(url, token, record_metadata_file_path):
     """
@@ -50,15 +62,16 @@ def create_draft_record(url, token, record_metadata_file_path):
     record_id = record_url.split('/api/records/')[-1]
     return record_id
 
-def start_file_uploads(url, token, record_id, data_files):
+def start_file_uploads(url, token, record_id, filenames):
     """
     Updates a record's metadata by specifying the files that should be attached to it
     Raises an exception if the record's metadata could not be updated
     """
     # Create the payload specifying the files to be attached to the record
     filename_vs_key = []
-    for f in data_files:
-        filename_vs_key.append({'key': f})
+
+    for filename in filenames:
+        filename_vs_key.append({'key': filename})
 
     payload = json.dumps(filename_vs_key)
 
@@ -142,41 +155,51 @@ def publish_draft_record(url, token, record_id):
     if response.status_code != 202:
         raise ValueError(f"Failed to publish record (code: {response.status_code})")
 
+
 if __name__ == '__main__':
-    # -----------------Please check the information below-----------------
-    # Select an archive
-    #url = 'https://archive.big-map.eu/'
-    url = 'https://big-map-archive-demo.materialscloud.org/'
+    # -----------------Users: verify the information below-----------------
+    # Specify the targeted archive:
+    # - the main archive (main = True)
+    # - the demo archive (main = False)
+    main = False
 
     # Specify a personal access token for the selected archive
     # If you need a valid token, navigate to 'Applications' > 'Personal access tokens'
-    token = '<replace by a personal token>'
+    #token = '<replace_with_token>'
+    token = '88j0czz2YnArs68xh8xv898h1IpulGCy4T7Dlh55ySkbKg7elBHSWNnpW1Oq'
 
     # Specify the folder where your input files are located
     input_folder = 'input'
 
-    # Specify your input files
-    record_metadata_file = 'record_metadata.json' # Contains the title, the list of authors...
-    data_files = ['a.json', 'b.png', 'c.pdf'] # Data files to be attached to the record
+    # Specify the file in the input folder that contains the record's title, the record's authors...
+    # Note that all other files in the input folder will automatically be attached to the record
+    record_metadata_file = 'record_metadata.json'
 
-    # Specify whether the record should
-    # - be shared with all the archive's users (publish = True) or
-    # - remain private to you (publish = False)
+    # Specify whether you wish to share the record with all archive's users
     publish = True
-    # --------------------------------------------------------------------
+
+    # ---------------Users: do not modify the information below---------------
+    # Archives' urls
+    main_archive_url = 'https://archive.big-map.eu/'
+    demo_archive_url = 'https://big-map-archive-demo.materialscloud.org/'
+    url = demo_archive_url
 
     logger = logging.getLogger()
     logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.INFO)
 
     try:
-        # Determine files' absolute paths
         basedir = os.path.abspath(os.path.dirname(__file__))
-        record_metadata_file_path = os.path.join(basedir, input_folder, record_metadata_file)
-        data_files_paths = [os.path.join(basedir, input_folder, f) for f in data_files]
+        input_folder_path = os.path.join(basedir, input_folder)
+        check_input_folder_exists(input_folder_path)
+        logger.info('Input folder exists')
 
-        check_input_files_exist(record_metadata_file_path, data_files_paths)
-        logger.info('Input files exist')
+        record_metadata_file_path = os.path.join(basedir, input_folder, record_metadata_file)
+        check_input_file_exists(record_metadata_file_path)
+        logger.info(f'Input file {record_metadata_file} exists')
+
+        if main:
+            url = main_archive_url
 
         # Create a draft on the archive
         # Get the record's id (e.g., 'cpbc8-ss975')
@@ -184,6 +207,9 @@ if __name__ == '__main__':
         logger.info(f'Draft record with id={record_id} created with success')
 
         # Update the record's metadata with the names of the data files to be attached to the record
+        # The data files are the files in the input folder, except for the record metadata file
+        data_files = get_data_files(input_folder_path, record_metadata_file)
+        data_files_paths = [os.path.join(input_folder_path, f) for f in data_files]
         start_file_uploads(url, token, record_id, data_files)
         logger.info('Data files specified with success')
 
@@ -194,11 +220,11 @@ if __name__ == '__main__':
 
         logger.info('Data files uploaded with success')
 
-        # Share the draft with all archive's users
         if publish:
+            # Share the draft with all archive's users
             publish_draft_record(url, token, record_id)
+            logger.info('Record published with success')
 
-        logger.info('Record published with success')
     except FileNotFoundError as exception:
         logger.error('File not found: ' + str(exception.filename))
     except Exception as exception:

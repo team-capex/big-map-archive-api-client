@@ -3,7 +3,7 @@ import requests
 import os
 import json
 
-def get_record_metadata(url, token, id):
+def get_shared_record_metadata(url, token, id):
     """
     Gets the metadata of a shared record
     Raises an exception if the metadata could not be obtained
@@ -26,7 +26,7 @@ def get_record_metadata(url, token, id):
     record_metadata = json.loads(response.text)
     return record_metadata
 
-def get_records_metadata(url, token, response_size):
+def get_all_shared_records_metadata(url, token, response_size):
     """
     Gets the metadata of all shared records
     Raises an exception if the metadata could not be obtained
@@ -107,11 +107,11 @@ if __name__ == '__main__':
             url = main_archive_url
 
         if single_record:
-            metadata = get_record_metadata(url, token, record_id)
+            metadata = get_shared_record_metadata(url, token, record_id)
             logger.info(f'Metadata of {record_id} obtained with success')
             output_file = f'{record_id}.json'
         else:
-            metadata = get_records_metadata(url, token, response_size)
+            metadata = get_all_shared_records_metadata(url, token, response_size)
             logger.info(f'Metadata of all records obtained with success')
             output_file = 'all_shared_records.json'
 
