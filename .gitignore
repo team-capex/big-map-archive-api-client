@@ -84,7 +84,11 @@ celerybeat-schedule
 .idea/
 
 # Exclude everything
+input/*
 output/*
+
+# Exceptions to the rule
+!input/example/*
 
 # Secret environment variables
 *.env
