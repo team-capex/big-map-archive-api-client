@@ -26,6 +26,7 @@ def check_api_access(url, token):
     # Raise an exception if there is an HTTP error
     response.raise_for_status()
 
+
 def check_folder_exists(folder_path):
     """
     Raises an exception if the folder does not exist
@@ -33,12 +34,14 @@ def check_folder_exists(folder_path):
     if not os.path.exists(folder_path):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), folder_path)
 
+
 def check_file_exists(file_path):
     """
     Raises an exception if the file does not exist
     """
     if not os.path.isfile(file_path):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), file_path)
+
 
 def create_draft(url, token, metadata_file_path):
     """
@@ -70,6 +73,7 @@ def create_draft(url, token, metadata_file_path):
     record_id = record_url.split('/api/records/')[-1]
     return record_id
 
+
 def get_data_files(input_folder_path, metadata_file):
     """
     Returns the filenames in the input folder, except for the metadata file
@@ -77,6 +81,7 @@ def get_data_files(input_folder_path, metadata_file):
     all_files = [item for item in os.listdir(input_folder_path) if os.path.isfile(os.path.join(input_folder_path, item))]
     data_files = [item for item in all_files if item != metadata_file]
     return data_files
+
 
 def start_file_uploads(url, token, record_id, data_files):
     """
@@ -104,6 +109,7 @@ def start_file_uploads(url, token, record_id, data_files):
         verify=True)
 
     response.raise_for_status()
+
 
 def upload_file_content(url, token, record_id, data_file_path, data_file):
     """
@@ -144,6 +150,7 @@ def complete_file_upload(url, token, record_id, data_file):
         verify=True)
 
     response.raise_for_status()
+
 
 def publish_draft(url, token, record_id):
     """
