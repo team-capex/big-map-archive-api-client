@@ -157,7 +157,7 @@ def set_publication_date(url, token, record_id):
     Sets the record's publication date to the current date in the record's metadata
     """
     metadata = get_draft_metadata(url, token, record_id)
-    metadata['metadata']['publication_date'] = date.today().strftime('%Y-%m-%d')  # '2020-06-01'
+    metadata['metadata']['publication_date'] = date.today().strftime('%Y-%m-%d')  # e.g., '2020-06-01'
     update_draft_metadata(url, token, record_id, metadata)
 
 
