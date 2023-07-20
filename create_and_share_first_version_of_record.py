@@ -5,7 +5,7 @@ import requests
 import errno
 import configparser
 from dotenv import load_dotenv
-
+from datetime import date
 
 def check_api_access(url, token):
     """
@@ -152,6 +152,60 @@ def complete_file_upload(url, token, record_id, data_file):
     response.raise_for_status()
 
 
+def set_publication_date(url, token, record_id):
+    """
+    Sets the record's publication date to the current date in the record's metadata
+    """
+    metadata = get_draft_metadata(url, token, record_id)
+    metadata['metadata']['publication_date'] = date.today().strftime('%Y-%m-%d')  # '2020-06-01'
+    update_draft_metadata(url, token, record_id, metadata)
+
+
+def get_draft_metadata(url, token, record_id):
+    """
+    Gets the metadata of a draft record
+    Raises an HTTPError exception if the request to get the record's metadata failed
+    """
+    request_headers = {
+        "Accept": "application/json",
+        "Content-type": "application/json",
+        "Authorization": f"Bearer {token}"
+    }
+
+    response = requests.get(
+        f"{url}/api/records/{record_id}/draft",
+        headers=request_headers,
+        verify=True)
+
+    response.raise_for_status()
+
+    record_metadata = json.loads(response.text)
+    return record_metadata
+
+
+def update_draft_metadata(url, token, record_id, record_metadata):
+    """
+    Updates the record's metadata
+    Raises an HTTPError exception if the request to update the record's metadata failed
+    """
+    payload = json.dumps(record_metadata)
+
+    request_headers = {
+        "Accept": "application/json",
+        "Content-type": "application/json",
+        "Authorization": f"Bearer {token}"
+    }
+
+    # Send PUT request
+    response = requests.put(
+        f'{url}/api/records/{record_id}/draft',
+        data=payload,
+        headers=request_headers,
+        verify=True)
+
+    response.raise_for_status()
+
+
 def publish_draft(url, token, record_id):
     """
     Shares a draft with all users of the archive
@@ -236,6 +290,9 @@ if __name__ == '__main__':
         publish_new_version = config.get('create_and_share_first_version_of_record', 'publish_new_version')
 
         if publish_new_version == 'True':
+            set_publication_date(url, token, record_id)
+            logger.info('Publication date set with success')
+
             # Share the draft with all archive's users
             publish_draft(url, token, record_id)
             logger.info('Record published with success')
