@@ -84,8 +84,8 @@ def start_file_uploads(url, token, record_id, data_files):
     # Create the payload specifying the files to be attached to the record
     filename_vs_key = []
 
-    for f in data_files:
-        filename_vs_key.append({'key': f})
+    for data_file in data_files:
+        filename_vs_key.append({'key': data_file})
 
     payload = json.dumps(filename_vs_key)
 
@@ -171,7 +171,8 @@ if __name__ == '__main__':
 
     # Specify a valid token for the selected archive
     # If you need a new token, navigate to 'Applications' > 'Personal access tokens'
-    token = '<replace_with_token>'
+    #token = '<replace_with_token>'
+    token = '6yIKqirBa91gnbn9M4Wo0RLOtRBc92OWdhgQQ0mIz9uRg9eswhQlsTtV4sk7'
 
     # Specify the folder where your input files are located
     input_folder = 'input'
@@ -216,7 +217,6 @@ if __name__ == '__main__':
         # Update the record's metadata with the names of the data files that will be attached to the record
         # The data files are the files in the input folder, except for the initial metadata file
         data_files = get_data_files(input_folder_path, initial_metadata_file)
-        data_files_paths = [os.path.join(input_folder_path, f) for f in data_files]
         start_file_uploads(url, token, record_id, data_files)
         logger.info('Data files specified with success')
 
