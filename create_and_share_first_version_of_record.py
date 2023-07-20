@@ -3,6 +3,8 @@ import os
 import logging
 import requests
 import errno
+import configparser
+from dotenv import load_dotenv
 
 
 def check_api_access(url, token):
@@ -143,7 +145,7 @@ def complete_file_upload(url, token, record_id, data_file):
 
     response.raise_for_status()
 
-def publish_draft_record(url, token, record_id):
+def publish_draft(url, token, record_id):
     """
     Shares a draft with all users of the archive
     Raises an HTTPError exception if the request to share the draft fails
@@ -163,48 +165,44 @@ def publish_draft_record(url, token, record_id):
 
 
 if __name__ == '__main__':
-    # -----------------Users: verify the information below-----------------
-    # Specify the targeted archive:
-    # - the main archive (main = True)
-    # - the demo archive (main = False)
-    main = False
-
-    # Specify a valid token for the selected archive
-    # If you need a new token, navigate to 'Applications' > 'Personal access tokens'
-    #token = '<replace_with_token>'
-    token = '6yIKqirBa91gnbn9M4Wo0RLOtRBc92OWdhgQQ0mIz9uRg9eswhQlsTtV4sk7'
-
-    # Specify the folder where your input files are located
-    input_folder = 'input'
-
-    # Specify the file in the input folder that contains the title, the authors... for the record
-    # Note that all other files in the input folder will automatically be attached to the record
-    initial_metadata_file = 'initial_metadata.json'
-
-    # Specify whether you wish to share the record with all archive's users
-    publish = True
-
-    # ---------------Users: do not modify the information below---------------
-    # Archives' urls
-    main_archive_url = 'https://archive.big-map.eu/'
-    demo_archive_url = 'https://big-map-archive-demo.materialscloud.org/'
-    url = demo_archive_url
-
-    if main:
-        url = main_archive_url
-
     logger = logging.getLogger()
     logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.INFO)
 
     try:
+        basedir = os.path.abspath(os.path.dirname(__file__))
+
+        # Read configuration file config.ini
+        config = configparser.ConfigParser()
+        config.read(os.path.join(basedir, 'config.ini'))
+
+        # Create environment variables from secrets.env
+        load_dotenv(os.path.join(basedir, 'secrets.env'))
+        logger.info('Environment variables created with success')
+
+        select_main_archive = config.get('general', 'select_main_archive')
+
+        if select_main_archive == 'True':
+            url = config.get('general', 'main_archive_url')
+            token = os.getenv('MAIN_ARCHIVE_TOKEN')
+        elif select_main_archive == 'False':
+            url = config.get('general', 'demo_archive_url')
+            token = os.getenv('DEMO_ARCHIVE_TOKEN')
+        else:
+            raise Exception('Invalid value for select_main_archive in config.ini')
+
+        # Make checks
+        # - validity of token
+        # - existence of input folder
+        # - existence of input metadata file
         check_api_access(url, token)
 
-        basedir = os.path.abspath(os.path.dirname(__file__))
+        input_folder = config.get('create_and_share_first_version_of_record', 'input_folder')
         input_folder_path = os.path.join(basedir, input_folder)
         check_folder_exists(input_folder_path)
         logger.info('Input folder exists')
 
+        initial_metadata_file = config.get('create_and_share_first_version_of_record', 'initial_metadata_file')
         initial_metadata_file_path = os.path.join(basedir, input_folder, initial_metadata_file)
         check_file_exists(initial_metadata_file_path)
         logger.info(f'Input file {initial_metadata_file} exists')
@@ -228,9 +226,11 @@ if __name__ == '__main__':
 
         logger.info('Data files uploaded with success')
 
-        if publish:
+        publish_new_version = config.get('create_and_share_first_version_of_record', 'publish_new_version')
+
+        if publish_new_version:
             # Share the draft with all archive's users
-            publish_draft_record(url, token, record_id)
+            publish_draft(url, token, record_id)
             logger.info('Record published with success')
 
     except requests.exceptions.HTTPError as e:
