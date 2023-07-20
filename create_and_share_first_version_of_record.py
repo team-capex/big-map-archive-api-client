@@ -235,7 +235,7 @@ if __name__ == '__main__':
 
         publish_new_version = config.get('create_and_share_first_version_of_record', 'publish_new_version')
 
-        if publish_new_version:
+        if publish_new_version == 'True':
             # Share the draft with all archive's users
             publish_draft(url, token, record_id)
             logger.info('Record published with success')
