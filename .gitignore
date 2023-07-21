@@ -88,7 +88,7 @@ input/*
 output/*
 
 # Exceptions to the rule
-!input/example/*
+!input/example
 
 # Secret environment variables
 *.env
