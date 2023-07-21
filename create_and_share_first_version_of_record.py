@@ -280,16 +280,16 @@ if __name__ == '__main__':
         logger.info('Data files specified with success')
 
         # For each data file, upload its content
-        for data_file in data_files:
-            data_file_path = os.path.join(basedir, input_folder, data_file)
-            upload_file_content(url, token, record_id, data_file_path, data_file)
-            complete_file_upload(url, token, record_id, data_file)
+        for file in data_files:
+            file_path = os.path.join(basedir, input_folder, file)
+            upload_file_content(url, token, record_id, file_path, file)
+            complete_file_upload(url, token, record_id, file)
 
         logger.info('Data files uploaded with success')
 
-        publish_draft = config.get('create_and_share_first_version_of_record', 'publish_draft')
+        publish = config.get('create_and_share_first_version_of_record', 'publish')
 
-        if publish_draft == 'True':
+        if publish == 'True':
             set_publication_date(url, token, record_id)
             logger.info('Publication date set with success')
 
