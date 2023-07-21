@@ -86,11 +86,13 @@ if __name__ == '__main__':
         else:
             raise Exception('Invalid value for select_main_archive in config.ini')
 
+        # Get the metadata of shared record(s)
         requested_records = config.get('export_records_to_file', 'requested_records')
         record_id = config.get('export_records_to_file', 'record_id')
         metadata = get_metadata_of_shared_records(url, token, response_size, requested_records, record_id)
         logger.info('Metadata of shared record(s) obtained with success')
 
+        # Export the obtained metadata to a file in the output folder
         output_folder = config.get('export_records_to_file', 'output_folder')
         output_folder_path = os.path.join(basedir, output_folder)
         recreate_folder(output_folder_path)
