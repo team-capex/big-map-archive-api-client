@@ -46,7 +46,7 @@ def check_file_exists(file_path):
 def create_draft(url, token, metadata_file_path):
     """
     Creates a record, which remains private to its owner, from a file
-    Raises an HTTPError exception if the request to create the record fails
+    Raises an HTTPError exception if the request to create the record failed
     Returns the id of the newly created record
     """
     # Create the payload from the file (title, authors...)
@@ -86,7 +86,7 @@ def get_data_files(input_folder_path, metadata_file):
 def start_file_uploads(url, token, record_id, data_files):
     """
     Updates a record's metadata by specifying the files that should be attached to it
-    Raises an HTTPError exception if the request to update the record fails
+    Raises an HTTPError exception if the request to update the record failed
     """
     # Create the payload specifying the files to be attached to the record
     filename_vs_key = []
@@ -114,7 +114,7 @@ def start_file_uploads(url, token, record_id, data_files):
 def upload_file_content(url, token, record_id, data_file_path, data_file):
     """
     Uploads a file's content
-    Raises an HTTPError exception if the request to upload the file's content fails
+    Raises an HTTPError exception if the request to upload the file's content failed
     """
     request_headers = {
         "Accept": "application/json",
@@ -136,7 +136,7 @@ def upload_file_content(url, token, record_id, data_file_path, data_file):
 def complete_file_upload(url, token, record_id, data_file):
     """
     Completes the upload of a file's content
-    Raises an HTTPError exception if the request to complete the upload of the file's content fails
+    Raises an HTTPError exception if the request to complete the upload of the file's content failed
     """
     request_headers = {
         "Accept": "application/json",
@@ -209,7 +209,7 @@ def update_draft_metadata(url, token, record_id, record_metadata):
 def publish_draft(url, token, record_id):
     """
     Shares a draft with all users of the archive
-    Raises an HTTPError exception if the request to share the draft fails
+    Raises an HTTPError exception if the request to share the draft failed
     """
     request_headers = {
         "Accept": "application/json",
@@ -287,9 +287,9 @@ if __name__ == '__main__':
 
         logger.info('Data files uploaded with success')
 
-        publish_new_version = config.get('create_and_share_first_version_of_record', 'publish_new_version')
+        publish_draft = config.get('create_and_share_first_version_of_record', 'publish_draft')
 
-        if publish_new_version == 'True':
+        if publish_draft == 'True':
             set_publication_date(url, token, record_id)
             logger.info('Publication date set with success')
 
