@@ -9,7 +9,7 @@ import shutil
 
 def get_metadata_of_record(url, token, record_id):
     """
-    Returns the metadata of a published record on the archive
+    Returns the metadata of a published record
     Raises an HTTPError exception if the request to get the metadata failed
     """
     request_headers = {
@@ -30,7 +30,7 @@ def get_metadata_of_record(url, token, record_id):
 
 def get_metadata_of_all_records(url, token, response_size):
     """
-    Returns the metadata of all published records on the archive
+    Returns the metadata of all published records
     Raises an HTTPError exception if the request to get the metadata failed
     """
     request_headers = {
@@ -70,16 +70,6 @@ def get_metadata_of_all_latest_versions(url, token, response_size):
 
     metadata = json.loads(response.text)
     return metadata
-
-
-def recreate_folder(folder_path):
-    """
-    Re-creates a folder if it exists, otherwise creates a new one
-    """
-    if os.path.exists(folder_path):
-        shutil.rmtree(folder_path)
-
-    os.makedirs(folder_path)
 
 
 def export_to_file(file_path, data):
@@ -139,15 +129,6 @@ if __name__ == '__main__':
         export_to_file(output_file_path, metadata)
 
         logger.info(f'Metadata obtained and exported to {output_file}')
-
-    except requests.exceptions.HTTPError as e:
-        logger.error('Error occurred: ' + str(e))
-
-        status_code = e.response.status_code
-        reason = e.response.reason
-
-        if status_code == 403 and reason == 'FORBIDDEN':
-            logger.error('Check token\'s validity')
 
     except Exception as e:
         logger.error('Error occurred: ' + str(e))
