@@ -4,7 +4,6 @@ import os
 import json
 import configparser
 from dotenv import load_dotenv
-import shutil
 
 
 def get_metadata_of_record(url, token, record_id):
@@ -27,6 +26,7 @@ def get_metadata_of_record(url, token, record_id):
 
     metadata = json.loads(response.text)
     return metadata
+
 
 def get_metadata_of_all_records(url, token, response_size):
     """
