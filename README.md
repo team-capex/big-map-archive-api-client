@@ -155,7 +155,7 @@ Feel free to adapt the template to your desired record:
 - the list of references (`related_identifiers`).
 
 Visit the [upload form](https://archive.big-map.eu/uploads/new) to find out 
-what options are available for the resource type, a license, and a reference scheme.
+what options are available for a resource type, a license, and a reference scheme.
 
 An example of input files is provided:
 - in `input/example/create_record` for the script `create_record.py`
