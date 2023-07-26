@@ -19,6 +19,7 @@ Three scripts are currently available:
 6. [Roadmap](#Roadmap)
 7. [Support](#Support)
 8. [Issue](#Issue)
+9. [Acknowledgements] (#Acknowledgements)
 
 ## Installation
 
@@ -185,7 +186,7 @@ Further work may include:
 
 If you have any comments or questions, please send your emails to big-map-archive@materialscloud.org.
 
-## Issues
+## Issue
 
 If you find a bug, please create an issue directly into [GitHub](https://github.com/materialscloud-org/big-map-archive-api-examples/issues). If possible, give enough details so that the BIG-MAP Archive team is able to reproduce the encountered problem. Thank you!
 
