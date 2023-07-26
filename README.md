@@ -11,15 +11,15 @@ Three scripts are currently available:
 
 ## Quick access
 
-1. [Installation](#Installation)
-2. [Secrets](#Secrets)
-3. [Configuration](#Configuration)
-4. [Input](#Input)
-5. [Execution](#Execution)
-6. [Roadmap](#Roadmap)
-7. [Support](#Support)
-8. [Issue](#Issue)
-9. [Acknowledgements](#Acknowledgements)
+1. [Installation](#installation)
+2. [Secrets](#secrets)
+3. [Configuration](#configuration)
+4. [Input](#input)
+5. [Execution](#execution)
+6. [Roadmap](#roadmap)
+7. [Support](#support)
+8. [Issue](#issue)
+9. [Acknowledgements](#acknowledgements)
 
 ## Installation
 
