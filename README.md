@@ -5,9 +5,9 @@
 This repository provides client scripts that are written in Python to interact with the BIG-MAP Archive's API. 
 
 Three scripts are currently available:
-- a script to create a record on BIG-MAP Archive, with the option to publish it (i.e., to share it with all users)
-- a script to retrieve the metadata of published records
-- a script to update a published record, with the options to create and publish a new version.
+- a script `create_record.py` to create a record on BIG-MAP Archive, with the option to publish it (i.e., to share it with all users)
+- a script `retrieve_record.py` to retrieve the metadata of published records
+- a script `update_record.py` to update a published record, with the options to create and publish a new version.
 
 ## Quick access
 
