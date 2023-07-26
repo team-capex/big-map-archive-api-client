@@ -7,7 +7,7 @@
                 "temperature": 234,
                 "pressure": 1
             },
-            "material": "metal A",
+            "material": "metal B",
             "property": "resistivity",
             "value": "9.2E−8"
         },
@@ -18,7 +18,7 @@
                 "temperature": 285,
                 "pressure": 1
             },
-            "material": "metal A",
+            "material": "metal B",
             "property": "resistivity",
             "value": "7.3E−8"
         }
@@ -27,7 +27,7 @@
         {
             "id": 0,
             "name": "A DFT-based...",
-            "material": "metal A",
+            "material": "metal B",
             "property": "resistivity",
             "value": "6.7E−8"
         }
