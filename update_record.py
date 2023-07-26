@@ -4,18 +4,57 @@ import requests
 import hashlib
 import configparser
 from dotenv import load_dotenv
+import sys
+import json
 
-from create_and_share_first_version_of_record import (start_file_uploads,
-                                                      upload_file_content,
-                                                      complete_file_upload,
-                                                      publish_draft,
-                                                      set_publication_date)
+from create_record import publish_draft, update_draft_metadata, get_draft_metadata, start_file_uploads, \
+    upload_file_content, complete_file_upload, insert_publication_date
+from retrieve_record import get_metadata_of_record
 
 
-def create_draft(url, token, shared_record_id):
+def create_draft_with_same_id(url, token, record_id):
     """
-    Creates a draft, which remains private to its owner, from a shared record, if such a draft does not exist
-    Returns the id of the newly created draft
+    Creates a draft from a published record
+    This draft has the same id as the published record
+    """
+    request_headers = {
+        "Accept": "application/json",
+        "Content-type": "application/json",
+        "Authorization": f"Bearer {token}"
+    }
+
+    response = requests.post(
+        f'{url}/api/records/{record_id}/draft',
+        headers=request_headers,
+        verify=True)
+
+    response.raise_for_status()
+
+    return response.json()
+
+
+def generate_metadata(full_record_metadata, file_path):
+    """
+    Updates the original record's metadata with the value provided by the file
+    Re-inserts the publication date if the record is published
+    """
+    with open(file_path, 'r') as f:
+        metadata = json.load(f)
+
+    if full_record_metadata['is_published']:
+        publication_date = full_record_metadata['metadata']['publication_date']
+        full_record_metadata['metadata'] = metadata
+        full_record_metadata['metadata']['publication_date'] = publication_date
+    else:
+        full_record_metadata['metadata'] = metadata
+
+    return full_record_metadata
+
+
+def create_new_version(url, token, record_id):
+    """
+    Creates a new version (draft) from a published record (if such a draft does not exist)
+    Returns the draft's id
     Raises an HTTPError exception if the request to create the record failed
     """
     request_headers = {
@@ -25,7 +64,7 @@ def create_draft(url, token, shared_record_id):
     }
 
     response = requests.post(
-        f'{url}/api/records/{shared_record_id}/versions',
+        f'{url}/api/records/{record_id}/versions',
         headers=request_headers,
         verify=True)
 
@@ -37,56 +76,19 @@ def create_draft(url, token, shared_record_id):
     return record_id
 
 
-def delete_file_links(url, token, record_id, filenames):
+def delete_all_links(url, token, id):
     """
-    Deletes file links in a draft
+    Removes all file links of a draft
+    Avoids raising a HTTPError exception when importing file links at a later stage
     """
-    for filename in filenames:
-        delete_file_link(url, token, record_id, filename)
-
-
-def delete_file_link(url, token, record_id, filename):
-    """
-    Deletes a file link in a draft
-    Raises an HTTPError exception if the request to delete the file link failed
-    """
-    request_headers = {
-        "Accept": "application/json",
-        "Content-type": "application/json",
-        "Authorization": f"Bearer {token}"
-    }
-
-    response = requests.delete(
-        f'{url}/api/records/{record_id}/draft/files/{filename}',
-        headers=request_headers,
-        verify=True)
-
-    response.raise_for_status()
-
-
-def import_file_links(url, token, record_id):
-    """
-    Imports the file links from a shared record into a new draft
-    This avoids re-uploading files, which would cause duplication on the data store
-    Raises an HTTPError exception if the request to import the file links failed
-    """
-    request_headers = {
-        "Accept": "application/json",
-        "Content-type": "application/json",
-        "Authorization": f"Bearer {token}"
-    }
-
-    response = requests.post(
-        f'{url}/api/records/{record_id}/draft/actions/files-import',
-        headers=request_headers,
-        verify=True)
-
-    response.raise_for_status()
+    checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
+    for f in checksum_vs_name_for_linked_files:
+        delete_link(url, token, id, f['name'])
 
 
 def get_checksum_vs_name_for_linked_files(url, token, record_id):
     """
-    Returns the name and the md5 hash of the content for each linked file in a draft
+    Returns the name and the md5 hash of each linked file in a draft
     Raises an HTTPError exception if the request to get the linked files' metadata failed
     """
     request_headers = {
@@ -115,9 +117,62 @@ def get_checksum_vs_name_for_linked_files(url, token, record_id):
     return checksum_vs_name_for_linked_files
 
 
+def delete_link(url, token, record_id, filename):
+    """
+    Deletes a file link in a draft
+    Raises an HTTPError exception if the request to delete the file link failed
+    """
+    request_headers = {
+        "Accept": "application/json",
+        "Content-type": "application/json",
+        "Authorization": f"Bearer {token}"
+    }
+
+    response = requests.delete(
+        f'{url}/api/records/{record_id}/draft/files/{filename}',
+        headers=request_headers,
+        verify=True)
+
+    response.raise_for_status()
+
+
+def import_links(url, token, record_id):
+    """
+    Imports the file links from a published record into a new version
+    This avoids re-uploading files, which would cause duplication on the data store
+    Raises an HTTPError exception if the request to import the file links failed
+    """
+    request_headers = {
+        "Accept": "application/json",
+        "Content-type": "application/json",
+        "Authorization": f"Bearer {token}"
+    }
+
+    response = requests.post(
+        f'{url}/api/records/{record_id}/draft/actions/files-import',
+        headers=request_headers,
+        verify=True)
+
+    response.raise_for_status()
+
+
+def delete_links_for_updated_files(url, token, id, input_folder_path):
+    """
+    Removes each file link for which there is a file with
+    - the same name but
+    - a different content
+    in the input folder (so-called updated file)
+    """
+    checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
+    checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
+    updated_files = get_updated_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files)
+    for f in updated_files:
+        delete_link(url, token, id, f)
+
+
 def get_checksum_vs_name_for_input_folder_files(input_folder_path):
     """
-    Returns the name and the md5 hash of the content for each file in the input folder
+    Returns the name and the md5 hash of each file in the input folder
     """
     files = [item for item in os.listdir(input_folder_path) if
                  os.path.isfile(os.path.join(input_folder_path, item))]
@@ -143,54 +198,83 @@ def get_checksum_vs_name_for_input_folder_files(input_folder_path):
 
 def get_updated_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files):
     """
-    Returns list of linked files for which there is a file in the input folder with the same name but a different content
+    Returns all linked files for which there is a file in the input folder with the same name but a different content
     """
     updated_files = []
 
-    for file in checksum_vs_name_for_linked_files:
-        filename = file['name']
-        file_checksum = file['checksum']
-        input_folder_files_with_same_name_and_different_content = [
-            f for f in checksum_vs_name_for_input_folder_files
-             if (f['name'] == filename and f['checksum'] != file_checksum)]
-        number_of_input_folder_files_with_same_name_and_different_content = len(
-            input_folder_files_with_same_name_and_different_content)
+    for linked_file in checksum_vs_name_for_linked_files:
+        filename = linked_file['name']
+        file_checksum = linked_file['checksum']
 
-        if number_of_input_folder_files_with_same_name_and_different_content > 0:
-            updated_files.append(file['name'])
+        files_in_folder_with_same_name_and_different_content = [ f for f in checksum_vs_name_for_input_folder_files
+                         if (f['name'] == filename and f['checksum'] != file_checksum)]
+
+        if len(files_in_folder_with_same_name_and_different_content) == 1:
+            # linked file is classified as updated
+            updated_files.append(filename)
 
     return updated_files
 
 
-def get_missing_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files):
+def delete_links_for_removed_files(url, token, id, input_folder_path):
     """
-    Returns list of linked files for which there is no file in the input folder with the same name and the same content
+    Removes each file link for which there is no file with
+    - the same name and
+    - the same content
+    in the input folder (so-called removed file)
     """
-    missing_files = []
+    checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
+    checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
+    removed_files = get_removed_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files)
+    for f in removed_files:
+        delete_link(url, token, id, f)
 
-    for file in checksum_vs_name_for_linked_files:
-        filename = file['name']
-        file_checksum = file['checksum']
-        input_folder_files_with_same_name_and_same_content = [
-            f for f in checksum_vs_name_for_input_folder_files
-             if (f['name'] == filename and f['checksum'] == file_checksum)]
-        number_of_input_folder_files_with_same_name_and_same_content = len(
-            input_folder_files_with_same_name_and_same_content)
 
-        if number_of_input_folder_files_with_same_name_and_same_content == 0:
-            missing_files.append(file['name'])
+def get_removed_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files):
+    """
+    Returns all linked files for which there is no file in the input folder with the same name and the same content
+    """
+    removed_files = []
+
+    for linked_file in checksum_vs_name_for_linked_files:
+        filename = linked_file['name']
+        file_checksum = linked_file['checksum']
+
+        files_in_folder_with_same_name_and_same_content = [ f for f in checksum_vs_name_for_input_folder_files
+                         if (f['name'] == filename and f['checksum'] == file_checksum)]
+
+        if len(files_in_folder_with_same_name_and_same_content) == 0:
+            # linked file is classified as "removed"
+            removed_files.append(filename)
+
+    return removed_files
+
+
+def insert_links_for_missing_files(url, token, id, input_metadata_file):
+    """
+    Creates a link in the draft for each data file in the input folder currently without a link (so-called missing files)
+    Uploads those files to the object store
+    """
+    checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
+    checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
+    missing_files = get_missing_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files, input_metadata_file)
+
+    start_file_uploads(url, token, id, missing_files)
+
+    for file in missing_files:
+        file_path = os.path.join(basedir, input_folder, file)
+        upload_file_content(url, token, id, file_path, file)
+        complete_file_upload(url, token, id, file)
+
+
+def get_missing_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files, metadata_file):
+    """
+    Returns all data files in the input folder currently without a link (so-called missing files)
+    """
+    missing_files = [f['name'] for f in checksum_vs_name_for_input_folder_files
+                   if (f['name'] != metadata_file) and (f not in checksum_vs_name_for_linked_files)]
 
     return missing_files
-
-
-def get_extra_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files):
-    """
-    Returns list of files in the input folder that are not already attached to the draft
-    """
-    extra_files = [f['name'] for f in checksum_vs_name_for_input_folder_files
-                   if f not in checksum_vs_name_for_linked_files]
-
-    return extra_files
 
 
 if __name__ == '__main__':
@@ -199,97 +283,73 @@ if __name__ == '__main__':
     logger.setLevel(logging.INFO)
 
     try:
-        basedir = os.path.abspath(os.path.dirname(__file__))
-
-        # Read configuration file config.ini
+        # Read configuration file named config.ini
         config = configparser.ConfigParser()
+        basedir = os.path.abspath(os.path.dirname(__file__))
         config.read(os.path.join(basedir, 'config.ini'))
 
         # Create environment variables from secrets.env
         load_dotenv(os.path.join(basedir, 'secrets.env'))
-        logger.info('Environment variables created with success')
 
-        select_main_archive = config.get('general', 'select_main_archive')
+        # Get selected archive
+        selected_archive = config.get('general', 'selected_archive')
 
-        if select_main_archive == 'True':
+        if selected_archive == 'main':
             url = config.get('general', 'main_archive_url')
             token = os.getenv('MAIN_ARCHIVE_TOKEN')
-        elif select_main_archive == 'False':
+        elif selected_archive == 'demo':
             url = config.get('general', 'demo_archive_url')
             token = os.getenv('DEMO_ARCHIVE_TOKEN')
         else:
-            raise Exception('Invalid value for select_main_archive in config.ini')
+            raise Exception('Invalid selected_archive in config.ini')
 
-        # Create a draft from a shared record (if such a draft does not exist)
-        # Get the id of the newly created draft
-        shared_record_id = config.get('create_and_share_new_version_of_record', 'shared_record_id')
-        record_id = create_draft(url, token, shared_record_id)
-        logger.info(f'Draft with id={record_id} created with success')
-
-        # Delete all file links in the draft (to avoid raising a HTTPError exception when importing file links)
-        checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, record_id)
-        filenames = [f['name'] for f in checksum_vs_name_for_linked_files]
-        delete_file_links(url, token, record_id, filenames)
-        checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, record_id)
-        filenames = [f['name'] for f in checksum_vs_name_for_linked_files]
-        logger.info(f'Links before import from previous version: {filenames}')
-
-        if checksum_vs_name_for_linked_files:
-            raise Exception('File links already present in the draft')
-
-        # Import the file links from the shared record into the new draft
-        import_file_links(url, token, record_id)
-        checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, record_id)
-        filenames = [f['name'] for f in checksum_vs_name_for_linked_files]
-        logger.info(f'Links after import: {filenames}')
-
-        # Remove each file link for which there is a file with the same name but a different content in the input folder
-        input_folder = config.get('create_and_share_new_version_of_record', 'input_folder')
+        # Get configuration data
+        id = config.get('update_record', 'record_id')
+        input_folder = config.get('update_record', 'input_folder')
         input_folder_path = os.path.join(basedir, input_folder)
-        checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
-        updated_files = get_updated_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files)
-        delete_file_links(url, token, record_id, updated_files)
-        logger.info(f'Links for updated file(s) {updated_files} removed')
+        metadata_file = config.get('update_record', 'metadata_file')
+        metadata_file_path = os.path.join(input_folder_path, metadata_file)
+        new_version = config.get('update_record', 'new_version')
 
-        delete_missing = config.get('create_and_share_new_version_of_record', 'delete_missing')
+        if new_version == 'False':
+            # Update metadata of current version
+            create_draft_with_same_id(url, token, id)
+            current_metadata = get_metadata_of_record(url, token, id)
+            metadata = generate_metadata(current_metadata, metadata_file_path)
+            update_draft_metadata(url, token, id, metadata)
+            publish_draft(url, token, id)
 
-        if delete_missing == 'True':
-            # Remove each file link for which there is no file with the same name and the same content in the input folder
-            checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, record_id)
-            missing_files = get_missing_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files)
-            delete_file_links(url, token, record_id, missing_files)
-            logger.info(f'Links for missing file(s) {missing_files} removed')
+            logger.info(f'Metadata of published record with id={id} updated')
 
-        # Specify the extra files in the input folder to upload and link to the draft
-        checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, record_id)
-        extra_files = get_extra_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files)
-        start_file_uploads(url, token, record_id, extra_files)
-        logger.info(f'Record\'s metadata updated with extra file(s) {extra_files}')
+            sys.exit(0)
 
-        # Upload and link extra files
-        for file in extra_files:
-            file_path = os.path.join(basedir, input_folder, file)
-            upload_file_content(url, token, record_id, file_path, file)
-            complete_file_upload(url, token, record_id, file)
+        # Create a new version (draft) from published record
+        id = create_new_version(url, token, id)
 
-        publish = config.get('create_and_share_new_version_of_record', 'publish')
+        # Update draft's metadata
+        current_metadata = get_draft_metadata(url, token, id)
+        metadata = generate_metadata(current_metadata, metadata_file_path)
+        update_draft_metadata(url, token, id, metadata)
+
+        # Update draft's data file links
+        delete_all_links(url, token, id)
+        import_links(url, token, id)
+        delete_links_for_updated_files(url, token, id, input_folder_path)
+        delete_removed = config.get('update_record', 'delete_removed')
+        if delete_removed == 'True':
+            delete_links_for_removed_files(url, token, id, input_folder_path)
+        insert_links_for_missing_files(url, token, id, metadata_file)
+
+        logger.info(f'Draft with id={id} created')
+
+        # Publish draft depending on user's choice
+        publish = config.get('update_record', 'publish')
 
         if publish == 'True':
-            set_publication_date(url, token, record_id)
-            logger.info('Publication date set with success')
+            insert_publication_date(url, token, id)
+            publish_draft(url, token, id)
 
-            # Share the draft with all archive's users
-            publish_draft(url, token, record_id)
-            logger.info('Record published with success')
-
-    except requests.exceptions.HTTPError as e:
-        logger.error('Error occurred: ' + str(e))
-
-        status_code = e.response.status_code
-        reason = e.response.reason
-
-        if status_code == 403 and reason == 'FORBIDDEN':
-            logger.error('Check token\'s validity')
+            logger.info(f'Draft with id={id} published')
 
     except Exception as e:
         logger.error('Error occurred: ' + str(e))
