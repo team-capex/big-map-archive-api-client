@@ -19,7 +19,7 @@ Three scripts are currently available:
 6. [Roadmap](#Roadmap)
 7. [Support](#Support)
 8. [Issue](#Issue)
-9. [Acknowledgements] (#Acknowledgements)
+9. [Acknowledgements](#Acknowledgements)
 
 ## Installation
 
