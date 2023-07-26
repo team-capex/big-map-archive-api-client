@@ -43,7 +43,8 @@ MAIN_ARCHIVE_TOKEN='<valid_token_for_main>'
 DEMO_ARCHIVE_TOKEN='<valid_token_for_demo>'
 ```
 
-Replace `<valid_token_for_main>` by a personal access token for the main repository. Do the same for the demo repository.
+Replace `<valid_token_for_main>` by a personal access token for the [main repository](https://archive.big-map.eu/account/settings/applications/). 
+Do the same for the [demo repository](https://big-map-archive-demo.materialscloud.org/account/settings/applications/).
 
 ## Configuration
 
