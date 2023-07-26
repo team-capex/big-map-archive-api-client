@@ -13,8 +13,8 @@ Three scripts are currently available:
 
 1. [Installation](#Installation)
 2. [Secrets](#Secrets)
-3. [Configuration files](#Configuration)
-4. [Input files](#Input files)
+3. [Configuration](#Configuration)
+4. [Input](#Input)
 5. [Execution](#Execution)
 6. [Roadmap](#Roadmap)
 7. [Support](#Support)
@@ -53,7 +53,7 @@ Note that `config.ini` contains multiple sections:
 - a section per script, which applies to a single script only; 
 for instance, the section `[create_record]` applies to the script `create_record.py`. 
 
-## Input files
+## Input
 
 The scripts `create_record` and `update_record` creates a record and updates a published record respectively.
 
