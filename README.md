@@ -1,70 +1,185 @@
-# Consuming BIG-MAP Archive's REST API
+# big-map-archive-api-examples
 
-Below is an example of how to programmatically <b>create and share records</b> on [BIG-MAP Archive](https://archive.big-map.eu/) via its [application programming interface](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records) (API) using a Python script.
+## Overview
 
-## Demo archive
+This repository provides client scripts that are written in Python to interact with the BIG-MAP Archive's API. 
 
-In addition to the main production archive (with daily backups), 
-a [demo archive](https://big-map-archive-demo.materialscloud.org/) is available so that you can practice creating and managing records via an API. 
-For testing purposes, use the demo archive.
+Three scripts are currently available:
+- a script to create a record on BIG-MAP Archive, with the option to publish it (i.e., to share it with all users)
+- a script to retrieve the metadata of published records
+- a script to update a published record, with the options to create and publish a new version.
 
-## User accounts
+## Quick access
 
-The main archive and the demo archive are independent systems. If you are a registered BIG-MAP member, two accounts (one per archive) should have been created for you by the BIG-MAP Archive team. 
+1. [Installation](#Installation)
+2. [Secrets](#Secrets)
+3. [Configuration files](#Configuration)
+4. [Input files](#Input files)
+5. [Execution](#Execution)
+6. [Roadmap](#Roadmap)
+7. [Support](#Support)
+8. [Issue](#Issue)
 
-Prior to your first login to an archive, you should reset your password, as explained in the [tutorial](https://github.com/materialscloud-org/big-map-archive/blob/master/user_training/getting_started_with_big-map-archive.md).
+## Installation
 
-## Fulfill requirements
+Proceed as follows to install the scripts:
 
-Clone the repository `big-map-archive-api-examples` to your local machine. You need Python and the `requests` library:
+1. Clone the [GitHub repository](https://github.com/materialscloud-org/big-map-archive-api-examples/).
+2. Create and activate a virtual environment named `big-map-archive-api-examples`.
+3. Install dependencies from `requirements.txt`.
+4. Create a file named `secrets.env` at the project's root and fill it in with secrets.
 
-```
-pip install requests
-```
+## Secrets
 
-## Obtain a token
+A template for the file `secrets.env` is provided below:
 
-You need a personal API access token. If you do not have one yet, click [here](https://big-map-archive-demo.materialscloud.org/account/settings/applications/tokens/new/) after a successful login.
+```bash
+# SECURITY WARNING: keep the content of this file secret!
+# Do not commit it to a source code repository
 
-Next, edit [`create_and_share_records.py`](create_and_share_records.py) and add the token:
-
-```python
-token = "<replace by a personal token>"
-```
-
-## Inspect input files
-
-We created 2 folders:
-- `records/0`
-- `records/1`.
-
-Each folder will give a new record in the archive. It contains various files, including:
-- `record_metadata.json`: a JSON file that contains metadata about the record (title, authors...)
-- `scientific_data.json`: a JSON file that contains metadata and data about scientific experiments/simulations.
-
-## Select the targeted archive
-
-Edit the script and select the archive to send your requests to:
-
-```python
-#url = "https://archive.big-map.eu/"
-url = "https://big-map-archive-demo.materialscloud.org/"
+# Personal access token for the archive (to create a new token, navigate to 'Applications' > 'Personal access tokens')
+MAIN_ARCHIVE_TOKEN='<valid_token_for_main>'
+DEMO_ARCHIVE_TOKEN='<valid_token_for_demo>'
 ```
 
-## Create and share records
+Replace `<valid_token_for_main>` by a personal access token for the main repository. Do the same for the demo repository.
 
-Running the script `create_and_share_records.py` creates and shares 2 records on the archive from the 2 folders mentioned above. 
-Note that, while the files `record_metadata.json` are used for filling in the metadata section of the upload forms, the other files are simply attached to the records.
+## Configuration
 
-You can run the upload script using the `python` command:
+Users are invited to configure the scripts by assigning valid values of their choosing to keys in `config.ini`.
+
+Note that `config.ini` contains multiple sections:
+- a general section named `[general]`, which applies to all scripts
+- a section per script, which applies to a single script only; 
+for instance, the section `[create_record]` applies to the script `create_record.py`. 
+
+## Input files
+
+The scripts `create_record` and `update_record` creates a record and updates a published record respectively.
+
+For both scripts, two types of input files can be provided in the `input` folder:
+- a single metadata file `metadata.json`, which specifies the title of the desired record, its authors, etc
+- one or more data files of any format and of total size smaller than 100 GB; these files will be uploaded to BIG-MAP Archive and linked to the record.
+
+A template for `metadata.json` is as follows:
+
+```json
+{
+  "creators": [
+    {
+      "affiliations": [
+        {
+          "name": "Theory and Simulation of Materials (THEOS), École Polytechnique Fédérale de Lausanne, CH-1015 Lausanne, Switzerland"
+        }
+      ],
+      "person_or_org": {
+        "family_name": "Liot",
+        "given_name": "Francois",
+        "name": "Liot, Francois",
+        "type": "personal"
+      }
+    },
+    {
+      "affiliations": [
+        {
+          "name": "Theory and Simulation of Materials (THEOS), École Polytechnique Fédérale de Lausanne, CH-1015 Lausanne, Switzerland"
+        },
+        {
+          "name": "Center for Catalysis Theory (Cattheory), Department of Physics, Technical University of Denmark (DTU), 2800 Kongens Lyngby, Denmark"
+        }
+      ],
+      "person_or_org": {
+        "family_name": "Von Big-Map",
+        "given_name": "Emma",
+        "name": "Von Big-Map, Emma",
+        "type": "personal"
+      }
+    }
+  ],
+  "description": "<p>Accurate first-principles predictions of the structural, electronic, magnetic, and electrochemical properties of cathode materials can be key in the design of novel efficient Li-ion batteries...</p>",
+  "publisher": "BIG-MAP Archive",
+  "related_identifiers": [
+    {
+      "identifier": "10.1000/182",
+      "relation_type": {
+        "id": "references",
+        "title": {
+          "en": "References"
+        }
+      },
+      "scheme": "doi"
+    }
+  ],
+  "resource_type": {
+    "id": "dataset",
+    "title": {
+      "en": "Dataset"
+    }
+  },
+  "rights": [
+    {
+      "description": {
+        "en": "The BIG-MAP Archive License allows re-distribution and re-use of work within the BIG-MAP community."
+      },
+      "id": "bm-1.0",
+      "props": {
+        "scheme": "spdx",
+        "url": "https://www.big-map.eu/"
+      },
+      "title": {
+        "en": "BIG-MAP Archive License"
+      }
+    }
+  ],
+  "subjects": [
+    {
+      "subject": "Li-ion batteries"
+    },
+    {
+      "subject": "DFT+U+V"
+    }
+  ],
+  "title": "Inter-site Hubbard interactions in Li-ion cathode rods"
+}
+```
+
+Feel free to adapt the template to your desired record:
+- the resource type (corresponding to the key `resource_type` in the template)
+- the title (`title`)
+- the list of authors (`creators`)
+- the description (`description`)
+- the list of licenses (`rights`)
+- the list of keywords (`subjects`)
+- the list of references (`related_identifiers`).
+
+Visit the [upload form](https://archive.big-map.eu/uploads/new) to find out 
+what options are available for the resource type, a license, and a reference scheme.
+
+An example of input files is provided:
+- in `input/example/create_record` for the script `create_record.py`
+- in `input/example/update_record` for the script `update_record.py`.
+
+## Execution
+
+You can run the scripts using the `python` command:
 
 ```
-python create_and_share_records.py
+python create_record.py
+```
+```
+python retrieve_record.py
+```
+```
+python update_record.py
 ```
 
-If the execution terminates successfully, you should be able to [access the newly-shared records](https://big-map-archive-demo.materialscloud.org/search).
+## Roadmap
 
-Running the script also generates a file named `records_links.json` in the `records` folder. This file stores URLs for the newly-created records. It can be used to act on these records via the API (e.g., to update a record).
+Further work may include:
+- renaming the repository `big-map-archive-api-client`
+- creating a Python package, which users would be able to install in their virtual environment
+- adopting a more object-oriented programming approach by declaring a class `BMA`
+- defining commands, which users would be able to call from a Linux terminal.
 
 ## Support
 
