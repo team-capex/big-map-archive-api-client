@@ -14,8 +14,7 @@ from retrieve_record import get_metadata_of_record
 
 def create_draft_with_same_id(url, token, record_id):
     """
-    Creates a draft from a published record
-    This draft has the same id as the published record
+    Creates a draft from the published record
     """
     request_headers = {
         "Accept": "application/json",
@@ -35,7 +34,7 @@ def create_draft_with_same_id(url, token, record_id):
 
 def generate_metadata(full_record_metadata, file_path):
     """
-    Updates the original record's metadata with the value provided by the file
+    Updates the metadata of a record using the file's content
     Re-inserts the publication date if the record is published
     """
     with open(file_path, 'r') as f:
@@ -53,7 +52,7 @@ def generate_metadata(full_record_metadata, file_path):
 
 def create_new_version(url, token, record_id):
     """
-    Creates a new version (draft) from a published record (if such a draft does not exist)
+    Creates a draft (new version) from the published record, if such a draft does not already exist
     Returns the draft's id
     Raises an HTTPError exception if the request to create the record failed
     """
@@ -76,19 +75,19 @@ def create_new_version(url, token, record_id):
     return record_id
 
 
-def delete_all_links(url, token, id):
+def delete_all_links(url, token, record_id):
     """
-    Removes all file links of a draft
+    Removes all file links from the draft
     Avoids raising a HTTPError exception when importing file links at a later stage
     """
-    checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
+    checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, record_id)
     for f in checksum_vs_name_for_linked_files:
-        delete_link(url, token, id, f['name'])
+        delete_link(url, token, record_id, f['name'])
 
 
 def get_checksum_vs_name_for_linked_files(url, token, record_id):
     """
-    Returns the name and the md5 hash of each linked file in a draft
+    Returns the name and the md5 hash of all linked files in the draft
     Raises an HTTPError exception if the request to get the linked files' metadata failed
     """
     request_headers = {
@@ -119,7 +118,7 @@ def get_checksum_vs_name_for_linked_files(url, token, record_id):
 
 def delete_link(url, token, record_id, filename):
     """
-    Deletes a file link in a draft
+    Removes a file link from the draft
     Raises an HTTPError exception if the request to delete the file link failed
     """
     request_headers = {
@@ -138,7 +137,7 @@ def delete_link(url, token, record_id, filename):
 
 def import_links(url, token, record_id):
     """
-    Imports all file links from a published record into a new version
+    Imports all file links from the published record into the draft (new version)
     This avoids re-uploading files, which would cause duplication on the data store
     Raises an HTTPError exception if the request to import the file links failed
     """
@@ -158,7 +157,7 @@ def import_links(url, token, record_id):
 
 def delete_links_for_updated_files(url, token, id, input_folder_path):
     """
-    Removes each link for a file that also appears in the input folder under the same name but storing a different content
+    Removes all links from the draft for files that appear in the input folder with a different content
     """
     checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
     checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
@@ -169,7 +168,7 @@ def delete_links_for_updated_files(url, token, id, input_folder_path):
 
 def get_checksum_vs_name_for_input_folder_files(input_folder_path):
     """
-    Returns the name and the md5 hash of each file in the input folder
+    Returns the name and the md5 hash of all files in the input folder
     """
     files = [item for item in os.listdir(input_folder_path) if
                  os.path.isfile(os.path.join(input_folder_path, item))]
@@ -195,7 +194,7 @@ def get_checksum_vs_name_for_input_folder_files(input_folder_path):
 
 def get_updated_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files):
     """
-    Returns each linked file that also appears in the input folder under the same name but storing a different content
+    Returns all linked files in a draft that appear in the input folder with a different content
     """
     updated_files = []
 
@@ -215,7 +214,7 @@ def get_updated_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_in
 
 def delete_links_for_removed_files(url, token, id, input_folder_path):
     """
-    Removes each link for a file that does not appear in the input folder
+    Removes all file links from the draft for files that do not appear in the input folder
     """
     checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
     checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
@@ -226,7 +225,7 @@ def delete_links_for_removed_files(url, token, id, input_folder_path):
 
 def get_removed_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files):
     """
-    Returns each linked file that does not appear in the input folder
+    Returns all linked files that do not appear in the input folder
     """
     removed_files = []
 
@@ -246,7 +245,7 @@ def get_removed_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_in
 
 def insert_links_for_added_files(url, token, id, input_metadata_file):
     """
-    Uploads each data file in the input folder for which there is currently no link and creates a link
+    Uploads all data files in the input folder for which there is currently no link in the draft and creates links
     """
     checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
     checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
@@ -262,7 +261,7 @@ def insert_links_for_added_files(url, token, id, input_metadata_file):
 
 def get_added_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files, metadata_file):
     """
-    Returns each data file in the input folder for which there is currently no link
+    Returns all data files in the input folder for which there is currently no link
     """
     added_files = [f['name'] for f in checksum_vs_name_for_input_folder_files
                    if (f['name'] != metadata_file) and (f not in checksum_vs_name_for_linked_files)]
