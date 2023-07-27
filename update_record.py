@@ -157,7 +157,7 @@ def import_links(url, token, record_id):
 
 def delete_links_for_updated_files(url, token, id, input_folder_path):
     """
-    Removes all links from the draft for files that also appear in the input folder but with a different content
+    Removes all file links from the draft for files that also appear in the input folder but with a different content
     """
     checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
     checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
