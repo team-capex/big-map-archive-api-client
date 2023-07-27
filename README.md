@@ -179,6 +179,8 @@ python update_record.py
 
 Further work may include:
 - renaming the repository `big-map-archive-api-client`
+- unit testing
+- validating `metadata.json`
 - creating a Python package, which users would be able to install in their virtual environment
 - adopting a more object-oriented programming approach by declaring a class `BMA`
 - defining commands, which users would be able to call from a Linux terminal.
