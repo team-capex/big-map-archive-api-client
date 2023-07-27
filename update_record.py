@@ -194,7 +194,7 @@ def get_checksum_vs_name_for_input_folder_files(input_folder_path):
 
 def get_updated_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files):
     """
-    Returns all linked files in a draft that also appear in the input folder but with a different content
+    Returns all linked files that also appear in the input folder but with a different content
     """
     updated_files = []
 
