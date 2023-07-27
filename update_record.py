@@ -138,7 +138,7 @@ def delete_link(url, token, record_id, filename):
 
 def import_links(url, token, record_id):
     """
-    Imports the file links from a published record into a new version
+    Imports all file links from a published record into a new version
     This avoids re-uploading files, which would cause duplication on the data store
     Raises an HTTPError exception if the request to import the file links failed
     """
@@ -158,10 +158,7 @@ def import_links(url, token, record_id):
 
 def delete_links_for_updated_files(url, token, id, input_folder_path):
     """
-    Removes each file link for which there is a file with
-    - the same name but
-    - a different content
-    in the input folder (so-called updated file)
+    Removes each file link for which the file appears in the input folder with a modified content
     """
     checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
     checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
@@ -198,7 +195,7 @@ def get_checksum_vs_name_for_input_folder_files(input_folder_path):
 
 def get_updated_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files):
     """
-    Returns all linked files for which there is a file in the input folder with the same name but a different content
+    Returns all linked files that appear in the input folder with a modified content
     """
     updated_files = []
 
@@ -218,10 +215,7 @@ def get_updated_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_in
 
 def delete_links_for_removed_files(url, token, id, input_folder_path):
     """
-    Removes each file link for which there is no file with
-    - the same name and
-    - the same content
-    in the input folder (so-called removed file)
+    Removes each file link for which the file does not appear in the input folder
     """
     checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
     checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
@@ -232,7 +226,7 @@ def delete_links_for_removed_files(url, token, id, input_folder_path):
 
 def get_removed_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files):
     """
-    Returns all linked files for which there is no file in the input folder with the same name and the same content
+    Returns all linked files that do not appear in the input folder
     """
     removed_files = []
 
@@ -250,31 +244,30 @@ def get_removed_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_in
     return removed_files
 
 
-def insert_links_for_missing_files(url, token, id, input_metadata_file):
+def insert_links_for_added_files(url, token, id, input_metadata_file):
     """
-    Creates a link in the draft for each data file in the input folder currently without a link (so-called missing files)
-    Uploads those files to the object store
+    Uploads each data file that appears in the input folder without a file link and then creates a link
     """
     checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
     checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
-    missing_files = get_missing_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files, input_metadata_file)
+    added_files = get_added_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files, input_metadata_file)
 
-    start_file_uploads(url, token, id, missing_files)
+    start_file_uploads(url, token, id, added_files)
 
-    for file in missing_files:
+    for file in added_files:
         file_path = os.path.join(basedir, input_folder, file)
         upload_file_content(url, token, id, file_path, file)
         complete_file_upload(url, token, id, file)
 
 
-def get_missing_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files, metadata_file):
+def get_added_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files, metadata_file):
     """
-    Returns all data files in the input folder currently without a link (so-called missing files)
+    Returns all data files that appear in the input folder without a file link
     """
-    missing_files = [f['name'] for f in checksum_vs_name_for_input_folder_files
+    added_files = [f['name'] for f in checksum_vs_name_for_input_folder_files
                    if (f['name'] != metadata_file) and (f not in checksum_vs_name_for_linked_files)]
 
-    return missing_files
+    return added_files
 
 
 if __name__ == '__main__':
@@ -332,13 +325,18 @@ if __name__ == '__main__':
         update_draft_metadata(url, token, id, metadata)
 
         # Update draft's data file links
+        # In this script, we classify data files as:
+        # - "kept": files that are linked to the previous version and will be linked to the new version
+        # - "updated": files that are linked to the previous version and will not be linked to the new version as such, because their content has changed
+        # - "removed": files that are linked to the previous version and will not be linked to the new version
+        # - "added": not linked to the previous version and will be linked to the new version
         delete_all_links(url, token, id)
         import_links(url, token, id)
         delete_links_for_updated_files(url, token, id, input_folder_path)
         delete_removed = config.get('update_record', 'delete_removed')
         if delete_removed == 'True':
             delete_links_for_removed_files(url, token, id, input_folder_path)
-        insert_links_for_missing_files(url, token, id, metadata_file)
+        insert_links_for_added_files(url, token, id, metadata_file)
 
         logger.info(f'Draft with id={id} created')
 
