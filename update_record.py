@@ -158,7 +158,7 @@ def import_links(url, token, record_id):
 
 def delete_links_for_updated_files(url, token, id, input_folder_path):
     """
-    Removes each file link for which the file appears in the input folder with a modified content
+    Removes each link for a file that also appears in the input folder under the same name but storing a different content
     """
     checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
     checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
@@ -195,7 +195,7 @@ def get_checksum_vs_name_for_input_folder_files(input_folder_path):
 
 def get_updated_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files):
     """
-    Returns all linked files that appear in the input folder with a modified content
+    Returns each linked file that also appears in the input folder under the same name but storing a different content
     """
     updated_files = []
 
@@ -215,7 +215,7 @@ def get_updated_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_in
 
 def delete_links_for_removed_files(url, token, id, input_folder_path):
     """
-    Removes each file link for which the file does not appear in the input folder
+    Removes each link for a file that does not appear in the input folder
     """
     checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
     checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
@@ -226,7 +226,7 @@ def delete_links_for_removed_files(url, token, id, input_folder_path):
 
 def get_removed_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files):
     """
-    Returns all linked files that do not appear in the input folder
+    Returns each linked file that does not appear in the input folder
     """
     removed_files = []
 
@@ -246,7 +246,7 @@ def get_removed_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_in
 
 def insert_links_for_added_files(url, token, id, input_metadata_file):
     """
-    Uploads each data file that appears in the input folder without a file link and then creates a link
+    Uploads each data file in the input folder for which there is currently no link and creates a link
     """
     checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
     checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
@@ -262,7 +262,7 @@ def insert_links_for_added_files(url, token, id, input_metadata_file):
 
 def get_added_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files, metadata_file):
     """
-    Returns all data files that appear in the input folder without a file link
+    Returns each data file in the input folder for which there is currently no link
     """
     added_files = [f['name'] for f in checksum_vs_name_for_input_folder_files
                    if (f['name'] != metadata_file) and (f not in checksum_vs_name_for_linked_files)]
@@ -326,10 +326,10 @@ if __name__ == '__main__':
 
         # Update draft's data file links
         # In this script, we classify data files as:
-        # - "kept": files that are linked to the previous version and will be linked to the new version
-        # - "updated": files that are linked to the previous version and will not be linked to the new version as such, because their content has changed
-        # - "removed": files that are linked to the previous version and will not be linked to the new version
-        # - "added": not linked to the previous version and will be linked to the new version
+        # - "kept": linked file that also appears in the input folder (under the same name and storing the same content)
+        # - "updated": linked file that also appears in the input folder under the same name but storing a different content
+        # - "removed": linked file that does not appear in the input folder
+        # - "added": data file in the input folder for which there is currently no link
         delete_all_links(url, token, id)
         import_links(url, token, id)
         delete_links_for_updated_files(url, token, id, input_folder_path)
