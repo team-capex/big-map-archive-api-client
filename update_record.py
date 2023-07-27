@@ -137,7 +137,7 @@ def delete_link(url, token, record_id, filename):
 
 def import_links(url, token, record_id):
     """
-    Imports all file links from the published record into the draft (new version)
+    Imports all file links from the published record into a draft (new version)
     This avoids re-uploading files, which would cause duplication on the data store
     Raises an HTTPError exception if the request to import the file links failed
     """
@@ -157,7 +157,7 @@ def import_links(url, token, record_id):
 
 def delete_links_for_updated_files(url, token, id, input_folder_path):
     """
-    Removes all links from the draft for files that appear in the input folder with a different content
+    Removes all links from the draft for files that also appear in the input folder but with a different content
     """
     checksum_vs_name_for_linked_files = get_checksum_vs_name_for_linked_files(url, token, id)
     checksum_vs_name_for_input_folder_files = get_checksum_vs_name_for_input_folder_files(input_folder_path)
@@ -194,7 +194,7 @@ def get_checksum_vs_name_for_input_folder_files(input_folder_path):
 
 def get_updated_files(checksum_vs_name_for_linked_files, checksum_vs_name_for_input_folder_files):
     """
-    Returns all linked files in a draft that appear in the input folder with a different content
+    Returns all linked files in a draft that also appear in the input folder but with a different content
     """
     updated_files = []
 
