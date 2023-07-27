@@ -1,4 +1,4 @@
-# big-map-archive-api-examples
+# big-map-archive-api-client
 
 ## Overview
 
@@ -25,8 +25,8 @@ Three scripts are currently available:
 
 Proceed as follows to install the scripts:
 
-1. Clone the [GitHub repository](https://github.com/materialscloud-org/big-map-archive-api-examples/).
-2. Create and activate a virtual environment named `big-map-archive-api-examples`.
+1. Clone the [GitHub repository](https://github.com/materialscloud-org/big-map-archive-api-client/).
+2. Create and activate a virtual environment named `big-map-archive-api-client`.
 3. Install dependencies from `requirements.txt`.
 4. Create a file named `secrets.env` at the project's root and fill it in with secrets.
 
@@ -191,7 +191,7 @@ If you have any comments or questions, please send your emails to big-map-archiv
 
 ## Issue
 
-If you find a bug, please create an issue directly into [GitHub](https://github.com/materialscloud-org/big-map-archive-api-examples/issues). If possible, give enough details so that the BIG-MAP Archive team is able to reproduce the encountered problem. Thank you!
+If you find a bug, please create an issue directly into [GitHub](https://github.com/materialscloud-org/big-map-archive-api-client/issues). If possible, give enough details so that the BIG-MAP Archive team is able to reproduce the encountered problem. Thank you!
 
 ## Acknowledgements
 
