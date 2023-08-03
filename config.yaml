@@ -1,0 +1,14 @@
+domain_name: big-map-archive-demo.materialscloud.org
+port: 443
+token:
+input_dir: input
+metadata_filename: metadata.json
+publish: true
+requested_record_id: kbjcj-kht77
+export: true
+output_dir: output
+output_filename: metadata.json
+all_versions: true
+response_size: 1000000
+
+
