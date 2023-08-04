@@ -10,5 +10,8 @@ output_dir: output
 output_filename: metadata.json
 all_versions: true
 response_size: 1000000
+same_version: false
+published_record_id: kbjcj-kht77
+delete_missing: true
 
 
