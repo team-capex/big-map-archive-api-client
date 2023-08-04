@@ -9,7 +9,7 @@ import json
 
 from create_record import publish_draft, update_draft_metadata, get_draft_metadata, start_file_uploads, \
     upload_file_content, complete_file_upload, insert_publication_date
-from retrieve_record import get_metadata_of_record
+from retrieve_records import get_metadata_of_record
 
 
 def create_draft_with_same_id(url, token, record_id):

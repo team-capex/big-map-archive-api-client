@@ -72,3 +72,22 @@ class RestAPIConnection:
 
         response = requests.put(url, **kwargs)
         return response
+
+    def delete(self, resource_path):
+        """
+        Sends a DELETE request and returns a response
+        """
+        url = self._base_url + resource_path
+
+        kwargs = {}
+
+        request_headers = {
+            'Accept': 'application/json',
+            'Content-type': 'application/json',
+            'Authorization': f'Bearer {self._token}'
+        }
+        kwargs['headers'] = request_headers
+        kwargs['verify'] = True
+
+        response = requests.delete(url, **kwargs)
+        return response

@@ -17,6 +17,9 @@ class ClientConfig(BaseModel):
     output_filename: str
     all_versions: bool
     response_size: int
+    same_version: bool
+    published_record_id: str
+    delete_missing: bool
 
     @classmethod
     def load_from_config_file(cls, file_path):
