@@ -4,14 +4,12 @@ token:
 input_dir: input
 metadata_filename: metadata.json
 publish: true
-requested_record_id: kbjcj-kht77
+requested_record_id: kq7ay-44k05
 export: true
 output_dir: output
 output_filename: metadata.json
 all_versions: true
 response_size: 1000000
 same_version: false
-published_record_id: kbjcj-kht77
-delete_missing: true
-
-
+published_record_id: kq7ay-44k05
+force: true # true: the file links in a new version match exactly the files in the input folder; false: extra file links imported from the previous version may be present

@@ -1,7 +1,7 @@
 from pathlib import Path
 import os
 from big_map_archive_api_client.client.client_config import ClientConfig
-from big_map_archive_api_client.utils import (get_data_filenames,
+from big_map_archive_api_client.utils import (get_input_folder_files,
                                               export_to_file)
 
 def create_record():
@@ -18,15 +18,10 @@ def create_record():
     metadata_filename = client_config.metadata_filename
     response = client.post_records(base_dir, input_dir, metadata_filename)
     record_id = response['id']
-    print(record_id)
 
     # Upload data files and insert links in the draft's metadata
-    filenames = get_data_filenames(base_dir, input_dir, metadata_filename)
-    client.post_files(record_id, filenames)
-
-    for filename in filenames:
-        client.put_content(record_id, base_dir, input_dir, filename)
-        client.post_commit(record_id, filename)
+    filenames = get_input_folder_files(base_dir, input_dir, metadata_filename)
+    client.upload_files(record_id, base_dir, input_dir, filenames)
 
     # Publish draft depending on user's choice
     publish = client_config.publish
@@ -34,6 +29,8 @@ def create_record():
     if publish:
         client.insert_publication_date(record_id)
         client.post_publish(record_id)
+
+    return record_id
 
 def retrieve_record():
     """
@@ -110,25 +107,30 @@ def update_record():
         # Import all file links from the previous version
         filenames = client.get_links(record_id)
         client.delete_links(record_id, filenames)
-
         client.post_file_import(record_id)
 
-        # Get list of links to remove and remove them
-        delete_missing = client_config.delete_missing
-        filenames = client.get_links_to_delete(record_id, delete_missing, base_dir, input_dir)
+        # Get file links to remove and remove them
+        force = client_config.force
+        filenames = client.get_links_to_delete(record_id, base_dir, input_dir, metadata_filename, force)
         client.delete_links(record_id, filenames)
 
-        # Get list of files to upload and add links
-        filenames = client.get_files_to_link(record_id, delete_missing, base_dir, input_dir, metadata_filename)
-        client.add_links(record_id, filenames)
+        # Get list of files to upload and upload them
+        filenames = client.get_files_to_upload(record_id, base_dir, input_dir, metadata_filename)
+        client.upload_files(record_id, base_dir, input_dir, filenames)
 
+        # Publish draft depending on user's choice
+        publish = client_config.publish
 
+        if publish:
+            client.insert_publication_date(record_id)
+            client.post_publish(record_id)
 
-
+        return record_id
 
 
 if __name__ == '__main__':
-    #create_record()
+    record_id = create_record()
     #retrieve_record()
     #retrieve_records()
-    update_record()
+    #record_id = update_record()
+    print(record_id)
