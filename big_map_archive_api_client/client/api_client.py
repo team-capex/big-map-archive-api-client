@@ -103,7 +103,6 @@ class APIClient:
         response = self.get_draft(record_id)
         response['metadata']['publication_date'] = date.today().strftime('%Y-%m-%d')  # e.g., '2020-06-01'
         response = self.put_draft(record_id, response)
-        return response.json()
 
     def post_publish(self, record_id):
         """
@@ -193,6 +192,17 @@ class APIClient:
         metadata = change_metadata(metadata, base_dir, input_dir, metadata_filename)
         self.put_draft(record_id, metadata)
 
+    def upload_files(self, record_id, base_dir, input_dir, filenames):
+        """
+        Uploads files located in the input folder to BIG-MAP Archive and
+        insert file links into a draft
+        """
+        self.post_files(record_id, filenames)
+
+        for filename in filenames:
+            self.put_content(record_id, base_dir, input_dir, filename)
+            self.post_commit(record_id, filename)
+
     def get_name_to_checksum_for_linked_files(self, record_id):
         """
         Gets the names and md5 hashes of a draft's linked files
@@ -200,20 +210,20 @@ class APIClient:
         response = self.get_files(record_id)
         entries = response['entries']
 
-        name_to_checksum_for_linked_files = [
+        linked_files = [
             {
                 'name': entry['key'],
                 'checksum': entry['checksum']
             } for entry in entries]
 
-        return name_to_checksum_for_linked_files
+        return linked_files
 
     def get_links(self, record_id):
         """
         Gets the names of a draft's linked files
         """
-        name_to_checksum_for_linked_files = self.get_name_to_checksum_for_linked_files(record_id)
-        filenames = [file['name'] for file in name_to_checksum_for_linked_files]
+        linked_files = self.get_name_to_checksum_for_linked_files(record_id)
+        filenames = [file['name'] for file in linked_files]
         return filenames
 
     def delete_links(self, record_id, filenames):
@@ -223,47 +233,63 @@ class APIClient:
         for filename in filenames:
             self.delete_filename(record_id, filename)
 
-    def get_changed_content_links(self, record_id, base_dir, input_dir):
+    def get_missing_files(self, record_id, base_dir, input_dir, metadata_filename):
         """
-        Gets the links in a draft for which there is a file in the input folder with the same name but a different content
+         Gets all linked files of a draft that are not in the input folder
         """
-        name_to_checksum_for_linked_files = self.get_name_to_checksum_for_linked_files(record_id)
-        name_to_checksum_for_input_folder_files = get_name_to_checksum_for_input_folder_files(base_dir, input_dir)
+        linked_files = self.get_name_to_checksum_for_linked_files(record_id)
+        input_folder_files = get_name_to_checksum_for_input_folder_files(base_dir, input_dir, metadata_filename)
+        filenames = [f['name'] for f in linked_files if f not in input_folder_files]
+
+        return filenames
+
+    def get_changed_content_files(self, record_id, base_dir, input_dir, metadata_filename):
+        """
+        Gets all linked files of a draft for which there is a file in the input folder with the same name but a different content
+        """
+        linked_files = self.get_name_to_checksum_for_linked_files(record_id)
+        input_folder_files = get_name_to_checksum_for_input_folder_files(base_dir, input_dir, metadata_filename)
 
         filenames = []
 
-        for file in name_to_checksum_for_linked_files:
+        # Iterate over the linked files
+        for file in linked_files:
             name = file['name']
             checksum = file['checksum']
 
-            files_in_folder_with_same_name_and_different_content = [f for f in name_to_checksum_for_input_folder_files
-                                                                    if (f['name'] == name and f[
-                    'checksum'] != checksum)]
+            # How many files in the input folder with the same name but a different content are there?
+            same_name_different_content_files = [f for f in input_folder_files
+                                                                    if (f['name'] == name and f['checksum'] != checksum)]
 
-            if len(files_in_folder_with_same_name_and_different_content) == 1:
-                # linked file is classified as updated
+            if len(same_name_different_content_files) == 1:
                 filenames.append(name)
 
         return filenames
 
-    def get_links_to_delete(self, record_id, delete_missing, base_dir, input_dir):
+    def get_links_to_delete(self, record_id, base_dir, input_dir, metadata_filename, force):
         """
-        Two possible reasons for deleting a link that was imported from the previous version into a new version:
-        - file has changed content (i.e., it appears in the input folder but with a different md5 hash)
-        - file has been removed (i.e., it does not appear in the input folder) and delete_removed is set to True
+        Reasons for deleting a file link in a draft:
+        - the linked file is not in the input folder and "force: true" in config.yaml
+        - a file with the same name as the linked file appears in the input folder but its content is different (md5 hash)
         """
-        filenames = self.get_changed_content_links(record_id, base_dir, input_dir)
+        filenames = self.get_changed_content_files(record_id, base_dir, input_dir, metadata_filename)
 
-        #if delete_missing:
-        #    filenames += self.get_missing_links()
+        if force:
+            filenames += self.get_missing_files(record_id, base_dir, input_dir, metadata_filename)
+
+        # Remove duplicates
+        filenames = list(set(filenames))
 
         return filenames
 
-    def get_files_to_upload_and_link(self, record_id, base_dir, input_dir, metadata_filename):
+    def get_files_to_upload(self, record_id, base_dir, input_dir, metadata_filename):
         """
-        TODO
+        Get all data files in the input folder for which there is currently no link
         """
-        filenames = []
+        input_folder_files = get_name_to_checksum_for_input_folder_files(base_dir, input_dir, metadata_filename)
+        linked_files = self.get_name_to_checksum_for_linked_files(record_id)
+        filenames = [f['name'] for f in input_folder_files if f not in linked_files]
+
         return filenames
 
     def upload_and_link(self, record_id, filenames):
