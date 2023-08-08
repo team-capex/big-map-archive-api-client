@@ -17,7 +17,8 @@ class APIClient:
         """
         Initialize internal variables
         """
-        self._connection = RestAPIConnection(domain_name, port, token)
+        self._connection = RestAPIConnection(domain_name, port)
+        self._token = token
 
     def post_records(self, base_dir, input_dir, metadata_filename):
         """
@@ -29,7 +30,7 @@ class APIClient:
         metadata_file_path = os.path.join(base_dir, input_dir, metadata_filename)
         full_metadata = generate_full_metadata(metadata_file_path)
         payload = json.dumps(full_metadata)
-        response = self._connection.post(resource_path, payload)
+        response = self._connection.post(resource_path, self._token, payload)
         response.raise_for_status()
         return response.json()
 
@@ -46,7 +47,7 @@ class APIClient:
             key_to_filename.append({'key': filename})
 
         payload = json.dumps(key_to_filename)
-        response = self._connection.post(resource_path, payload)
+        response = self._connection.post(resource_path, self._token, payload)
         response.raise_for_status()
         return response.json()
 
@@ -60,7 +61,7 @@ class APIClient:
 
         with open(file_path, 'rb') as f:
             payload = f
-            response = self._connection.put(resource_path, payload, 'application/octet-stream')
+            response = self._connection.put(resource_path, self._token, payload, 'application/octet-stream')
 
         response.raise_for_status()
         return response.json()
@@ -71,7 +72,7 @@ class APIClient:
         Raises an HTTPError exception if the request fails
         """
         resource_path = f'/api/records/{record_id}/draft/files/{filename}/commit'
-        response = self._connection.post(resource_path)
+        response = self._connection.post(resource_path, self._token)
         response.raise_for_status()
         return response.json()
 
@@ -81,7 +82,7 @@ class APIClient:
         Raises an HTTPError exception if the request fails
         """
         resource_path = f'/api/records/{record_id}/draft'
-        response = self._connection.get(resource_path)
+        response = self._connection.get(resource_path, self._token)
         response.raise_for_status()
         return response.json()
 
@@ -92,7 +93,7 @@ class APIClient:
         """
         resource_path = f'/api/records/{record_id}/draft'
         payload = json.dumps(metadata)
-        response = self._connection.put(resource_path, payload)
+        response = self._connection.put(resource_path, self._token, payload)
         response.raise_for_status()
         return response.json()
 
@@ -110,7 +111,7 @@ class APIClient:
         Raises an HTTPError exception if the request fails
         """
         resource_path = f'/api/records/{record_id}/draft/actions/publish'
-        response = self._connection.post(resource_path)
+        response = self._connection.post(resource_path, self._token)
         response.raise_for_status()
         return response.json()
 
@@ -120,7 +121,7 @@ class APIClient:
         Raises an HTTPError exception if the request fails
         """
         resource_path = f'/api/records/{record_id}'
-        response = self._connection.get(resource_path)
+        response = self._connection.get(resource_path, self._token)
         response.raise_for_status()
         return response.json()
 
@@ -130,7 +131,7 @@ class APIClient:
         Raises an HTTPError exception if the request fails
         """
         resource_path = f'/api/records?allversions={all_versions}&size={response_size}'
-        response = self._connection.get(resource_path)
+        response = self._connection.get(resource_path, self._token)
         response.raise_for_status()
         return response.json()
 
@@ -140,7 +141,7 @@ class APIClient:
         Raises an HTTPError exception if the request fails
         """
         resource_path = f'/api/records/{record_id}/draft'
-        response = self._connection.post(resource_path)
+        response = self._connection.post(resource_path, self._token)
         response.raise_for_status()
         return response.json()
 
@@ -150,7 +151,7 @@ class APIClient:
         Raises an HTTPError exception if the request fails
         """
         resource_path = f'/api/records/{record_id}/versions'
-        response = self._connection.post(resource_path)
+        response = self._connection.post(resource_path, self._token)
         response.raise_for_status()
         return response.json()
 
@@ -160,7 +161,7 @@ class APIClient:
         Raises an HTTPError exception if the request fails
         """
         resource_path = f'/api/records/{record_id}/draft/files'
-        response = self._connection.get(resource_path)
+        response = self._connection.get(resource_path, self._token)
         response.raise_for_status()
         return response.json()
 
@@ -170,7 +171,7 @@ class APIClient:
         Raises an HTTPError exception if the request fails
         """
         resource_path = f'/api/records/{record_id}/draft/files/{filename}'
-        response = self._connection.delete(resource_path)
+        response = self._connection.delete(resource_path, self._token)
         response.raise_for_status()
 
     def post_file_import(self, record_id):
@@ -180,7 +181,7 @@ class APIClient:
         Raises an HTTPError exception if the request fails
         """
         resource_path = f'/api/records/{record_id}/draft/actions/files-import'
-        response = self._connection.post(resource_path)
+        response = self._connection.post(resource_path, self._token)
         response.raise_for_status()
         return response.json()
 
