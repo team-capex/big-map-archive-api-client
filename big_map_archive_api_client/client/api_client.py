@@ -292,22 +292,5 @@ class APIClient:
 
         return filenames
 
-    def upload_and_link(self, record_id, filenames):
-        """
-        TODO
-        """
-        pass
-
-
-
-
-        """
-        Updates the file links for a draft
-        File links from the previous version are classified into 3 categories:
-            - 'updated': is linked to the previous version and also appears in the input folder but with a different md5 hash (i.e., with an updated content)
-            - 'former': is linked to the previous version but does not appear in the input folder
-            - 'new': appears in the input folder but there is no file linked to the previous version carrying this name
-        """
-
 
 
