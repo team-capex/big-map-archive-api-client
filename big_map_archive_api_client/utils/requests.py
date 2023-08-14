@@ -1,6 +1,8 @@
 import json
 import os
 import hashlib
+from zipfile import (ZipFile, ZIP_DEFLATED)
+from itertools import groupby
 
 
 def generate_full_metadata(provided_metadata_file_path):
@@ -25,16 +27,16 @@ def generate_full_metadata(provided_metadata_file_path):
     return full_metadata
 
 
-def export_to_file(base_dir, output_dir, output_filename, data):
+def export_to_json_file(base_dir, output_dir, output_filename, data):
     """
-    Exports data to file
+    Exports data to json file
     """
     # TODO Create output_dir if it does not exist
     # TODO Overwrite content of output file instead of appending
 
     file_path = os.path.join(base_dir, output_dir, output_filename)
 
-    with open(file_path, "a") as f:
+    with open(file_path, "w") as f:
         json.dump(data, f, indent=4, sort_keys=True)
 
 
@@ -95,3 +97,63 @@ def get_input_folder_files(base_dir, input_dir, metadata_filename):
     filenames = [f['name'] for f in input_folder_files]
 
     return filenames
+
+def export_capabilities_to_zip_file(base_dir, output_dir, filename, capabilities):
+    """
+    Puts each capability in the list in its own json file
+    Creates a zip file that contains all of these json files in the output folder
+    """
+    output_file_path = os.path.join(base_dir, output_dir, filename)
+    filenames = []
+
+    for c in capabilities:
+        quantity = c['quantity']
+        quantity = quantity.strip().replace(" ", "_") # Remove leading and trailing spaces and replace remaining spaces by _
+        method = c['method']
+        method = method.strip() # remove leading and trailing spaces
+        method = method.strip().replace(" ", "_")
+        file = f'{quantity}_{method}.json'
+        export_to_json_file(base_dir, output_dir, file, c)
+        filenames.append(file)
+
+    with ZipFile(output_file_path, 'w') as zf:
+        for file in filenames:
+            file_path = os.path.join(base_dir, output_dir, file)
+            zf.write(file_path, file, compress_type=ZIP_DEFLATED)
+            os.remove(file_path)
+
+def group_results_by_tenant(base_dir, output_dir, data):
+    """
+    Gives the result uuids grouped by tenant
+    """
+    results = [
+        {
+            'tenant_uuid': r['result']['tenant_uuid'],
+            'result_uuid': r['uuid']
+        }
+        for r in data]
+
+    key_func = lambda x: x['tenant_uuid']
+    results = sorted(results, key=key_func) # Order by tenant_uuid
+    lists_of_results = [list(group) for (k, group) in groupby(results, key=key_func)] # Group results by tenant_uuid
+    return lists_of_results
+
+def get_archive_token(base_dir, archives_for_tenants_filename, tenant_uuid, archive_domain_name):
+    """
+    Gets a personal access token of a tenant for an archive from a file
+    """
+    file_path = os.path.join(base_dir, archives_for_tenants_filename)
+
+    with open(file_path, 'r') as f:
+        tenant_archive_couples = json.load(f)
+
+    tokens = [tac['archive_token'] for tac in tenant_archive_couples
+              if (tac['finales_tenant_uuid'] == tenant_uuid and tac['archive_domain_name'] == archive_domain_name)]
+
+    if len(tokens) != 1:
+        raise Exception(f'Number of tokens for tenant {tenant_uuid} on {archive_domain_name}: {len(tokens)}')
+
+    return tokens[0]
+
+
+

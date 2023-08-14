@@ -8,7 +8,7 @@ from big_map_archive_api_client.utils import (generate_full_metadata,
                                               get_name_to_checksum_for_input_folder_files)
 
 
-class APIClient:
+class ArchiveAPIClient:
     """
     Class to interact with BMA's API
     """
@@ -292,6 +292,16 @@ class APIClient:
         filenames = [f['name'] for f in input_folder_files if f not in linked_files]
 
         return filenames
+
+    def get_user_records(self, all_versions, response_size):
+        """
+        Gets the metadata for all records of a user
+        Raises an HTTPError exception if the request fails
+        """
+        resource_path = f'/api/user/records?allversions={all_versions}&size={response_size}'
+        response = self._connection.get(resource_path, self._token)
+        response.raise_for_status()
+        return response.json()
 
 
 

@@ -1,0 +1,9 @@
+ip_address: 0.0.0.0 # Ip address of the finales server
+port: 13371 # Port for the finales server
+username: # Username for the finales server
+password: # Do not share!
+output_dir: output
+capabilities_filename: capabilities.zip
+results_requested_filename: results_requested.json
+archives_for_tenants_filename: archives_for_finales_tenants.json # Accounts of tenants on archives
+archive_domain_name: big-map-archive-demo.materialscloud.org

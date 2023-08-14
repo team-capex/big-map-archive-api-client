@@ -1,15 +1,15 @@
 domain_name: big-map-archive-demo.materialscloud.org
 port: 443
-token:
+token: # Do not share!
 input_dir: input
 metadata_filename: metadata.json
 publish: true
-requested_record_id: kq7ay-44k05
+requested_record_id: qekv3-5x808
 export: true
 output_dir: output
 output_filename: metadata.json
 all_versions: true
 response_size: 1000000
 same_version: false
-published_record_id: kq7ay-44k05
+published_record_id: qekv3-5x808
 force: true # true: the file links in a new version match exactly the files in the input folder; false: extra file links imported from the previous version may be present

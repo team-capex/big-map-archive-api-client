@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 import yaml
-from big_map_archive_api_client.client.api_client import APIClient
+from big_map_archive_api_client.client.api_client import ArchiveAPIClient
 
 class ClientConfig(BaseModel):
     """Configuration data for a BMA API's client."""
@@ -38,4 +38,4 @@ class ClientConfig(BaseModel):
         Creates a client to interact with BMA's API
         Initializes internal fields
         """
-        return APIClient(self.domain_name, self.port, self.token)
+        return ArchiveAPIClient(self.domain_name, self.port, self.token)
