@@ -14,13 +14,15 @@ class FinalesAPIClient:
     Class to interact with BMA's API
     """
 
-    def __init__(self, ip_address, port):
+    def __init__(self, ip_address, port, username, password):
         """
         Initialize internal variables
         """
         self._connection = FinalesRestAPIConnection(ip_address, port)
+        self._username = username
+        self._password = password
 
-    def post_authenticate(self, username, password):
+    def post_authenticate(self):
         """
         Gets a personal access token from the Finales server
         Raises an HTTPError exception if the request fails
@@ -28,8 +30,8 @@ class FinalesAPIClient:
         resource_path = '/user_management/authenticate'
 
         payload = {
-                'username': username,
-                'password': password,
+                'username': self._username,
+                'password': self._password,
                 'grant_type': 'password'}
 
         response = self._connection.post(resource_path=resource_path,
@@ -37,19 +39,26 @@ class FinalesAPIClient:
                                          content_type='application/x-www-form-urlencoded')
         return response.json()
 
-    def get_capabilities(self, token, query_string):
+    def get_capabilities(self, token):
         """
-        Gets the capabilities (JSON schemas used for request bodies and response bodies) from the Finales server
+        Gets all capabilities stored in the FINALES database
+        Note that a capability corresponds to a tuple (quantity, method),
+        where 'quantity' is the physical property to be evaluated and 'method' is the approach used to evaluate the property
         Raises an HTTPError exception if the request fails
         """
         resource_path = '/capabilities'
-        response = self._connection.get(resource_path, token, query_string=query_string)
+        response = self._connection.get(resource_path, token, query_string='currently_available=false')
         response.raise_for_status()
         return response.json()
 
     def get_results_requested(self, token):
         """
-        Gets the calculation/measurement results posted by the tenants to Finales
+        Gets all results associated with requests stored in the FINALES database
+        Note that:
+        (a) a request is associated with a capability and posted to the FINALES server by a FINALES tenant
+        that wishes to have a specific property evaluated using a specific method
+        (b) a result is associated with a request and posted to the FINALES server by a FINALES tenant that has performed
+        an evaluation of the specific property using the specific method
         Raises an HTTPError exception if the request fails
         """
         resource_path = '/results_requested'
