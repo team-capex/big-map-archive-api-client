@@ -14,8 +14,13 @@ def create_a_record(token,
                     metadata_filename='metadata.json',
                     publish=True):
     """
-    Creates a record on a BIG-MAP Archive and
-    publishes the created draft if desired
+    Creates a record on a BIG-MAP Archive and, optionally, publishes it.
+
+    :param token: personal access token for the archive
+    :param input_dir: directory where input files (metadata file and data files) are located
+    :param metadata_filename: name of the metadata file used for creating a record
+    :param publish: whether the created record (draft) should be published or not
+    :return: the id of the created record
     """
     base_dir = Path(__file__).absolute().parent.parent.parent
     config_file_path = os.path.join(base_dir, 'archive_config.yaml')
@@ -44,8 +49,13 @@ def retrieve_a_published_record(token,
                                 output_dir='data/output',
                                 output_filename='metadata.json'):
     """
-    Retrieves the metadata of a published record on a BIG-MAP Archive and
-    saves it to a file if desired
+    Retrieves the metadata of a published record on a BIG-MAP Archive and, optionally, saves it to a file.
+
+    :param token: personal access token for the archive
+    :param record_id: id of the published record to retrieve
+    :param export: whether the obtained metadata of the record should be saved to a file
+    :param output_dir: directory where the output file is located
+    :param output_filename: name of the output file
     """
     base_dir = Path(__file__).absolute().parent.parent.parent
     config_file_path = os.path.join(base_dir, 'archive_config.yaml')
@@ -64,8 +74,14 @@ def retrieve_all_published_records(token,
                                    all_versions=False,
                                    response_size='1e6'):
     """
-    Retrieves the metadata of all published records on a BIG-MAP Archive and
-    saves it to a file if desired
+    Retrieves the metadata of all published records on a BIG-MAP Archive and, optionally, saves it to a file.
+
+    :param token: personal access token for the archive
+    :param export: whether the obtained metadata of the records should be saved to a file
+    :param output_dir: directory where the output file is located
+    :param output_filename: name of the output file
+    :param all_versions: whether all record versions or only the latest record versions should be harvested
+    :param response_size: maximum number of items in a response body
     """
     base_dir = Path(__file__).absolute().parent.parent.parent
     config_file_path = os.path.join(base_dir, 'archive_config.yaml')
@@ -86,9 +102,18 @@ def update_a_published_record(token,
                               force=True,
                               publish=True):
     """
-    Updates a published record by
-    - either modifying the current version
-    - or creating a new version and publishing it if desired
+    Updates a published record by either modifying the current version or creating a new version and, optionally, publishing it.
+
+    :param token: personal access token for the archive
+    :param record_id: id of the published record to update
+    :param new_version: whether a new record version should be created
+    :param input_dir: directory where input files (metadata file and data files) are located
+    :param metadata_filename: name of the metadata file
+    :param force: whether the new version should contain file links only for data files in the input folder
+    (note that if such a file is already linked to the previous version, the link is simply imported, avoiding an extra upload)
+    or the new version may also contain file links imported from the previous version for data files that do not appear in the input folder
+    :param publish: whether the new version should be published
+    :return: the id of the updated version or the new version
     """
     base_dir = Path(__file__).absolute().parent.parent.parent
     config_file_path = os.path.join(base_dir, 'archive_config.yaml')
