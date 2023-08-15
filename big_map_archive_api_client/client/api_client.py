@@ -130,6 +130,7 @@ class ArchiveAPIClient:
         Gets published records' metadata
         Raises an HTTPError exception if the request fails
         """
+        response_size = int(float(response_size))
         resource_path = f'/api/records?allversions={all_versions}&size={response_size}'
         response = self._connection.get(resource_path, self._token)
         response.raise_for_status()

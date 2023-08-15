@@ -7,19 +7,6 @@ class ClientConfig(BaseModel):
 
     domain_name: str
     port: int
-    token: str
-    input_dir: str
-    metadata_filename: str
-    publish: bool
-    requested_record_id: str
-    export: bool
-    output_dir: str
-    output_filename: str
-    all_versions: bool
-    response_size: int
-    same_version: bool
-    published_record_id: str
-    force: bool
 
     @classmethod
     def load_from_config_file(cls, file_path):
@@ -33,9 +20,9 @@ class ClientConfig(BaseModel):
 
         return ClientConfig(**client_config)
 
-    def create_client(self):
+    def create_client(self, token):
         """
         Creates a client to interact with BMA's API
         Initializes internal fields
         """
-        return ArchiveAPIClient(self.domain_name, self.port, self.token)
+        return ArchiveAPIClient(self.domain_name, self.port, token)
