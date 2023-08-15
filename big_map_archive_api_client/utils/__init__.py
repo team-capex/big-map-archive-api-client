@@ -4,8 +4,8 @@ from .requests import (generate_full_metadata,
                        get_name_to_checksum_for_input_folder_files,
                        get_input_folder_files,
                        export_capabilities_to_zip_file,
-                       group_results_by_tenant,
-                       get_archive_token)
+                       get_tenant_uuids,
+                       get_token_for_archive_account)
 
 __all__ = [
     'generate_full_metadata',
@@ -14,6 +14,6 @@ __all__ = [
     'get_name_to_checksum_for_input_folder_files',
     'get_input_folder_files',
     'export_capabilities_to_zip_file',
-    'group_results_by_tenant',
-    'get_archive_token'
+    'get_tenant_uuids',
+    'get_token_for_archive_account'
 ]
