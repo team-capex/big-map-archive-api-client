@@ -2,12 +2,11 @@ import json
 import os
 import hashlib
 from zipfile import (ZipFile, ZIP_DEFLATED)
-from itertools import groupby
-import yaml
 
-def generate_full_metadata(provided_metadata_file_path):
+
+def generate_full_metadata(metadata_file_path):
     """
-    Generates a record's metadata from a file
+    Generates a record's full metadata from a file containing only partial metadata
     """
     full_metadata = {
         "access": {
@@ -20,32 +19,29 @@ def generate_full_metadata(provided_metadata_file_path):
         }
     }
 
-    with open(provided_metadata_file_path, 'r') as f:
-        provided_metadata = json.load(f)
+    with open(metadata_file_path, 'r') as f:
+        partial_metadata = json.load(f)
 
-    full_metadata['metadata'] = provided_metadata
+    full_metadata['metadata'] = partial_metadata
     return full_metadata
 
 
-def export_to_json_file(base_dir, output_dir, output_filename, data):
+def export_to_json_file(base_dir_path, output_file_path, data):
     """
-    Exports data to json file
+    Exports data to a JSON file
     """
-    # TODO Create output_dir if it does not exist
-    # TODO Overwrite content of output file instead of appending
+    output_file_path = os.path.join(base_dir_path, output_file_path)
 
-    file_path = os.path.join(base_dir, output_dir, output_filename)
-
-    with open(file_path, "w") as f:
+    with open(output_file_path, "w") as f:
         json.dump(data, f, indent=4, sort_keys=True)
 
 
-def change_metadata(full_record_metadata, base_dir, input_dir, metadata_filename):
+def change_metadata(full_record_metadata, base_dir_path, metadata_file_path):
     """
     Updates the value of the 'metadata' key in a full record's metadata using a file's content
     Re-inserts the publication date if the record is published
     """
-    file_path = os.path.join(base_dir, input_dir, metadata_filename)
+    file_path = os.path.join(base_dir_path, metadata_file_path)
     with open(file_path, 'r') as f:
         metadata = json.load(f)
 
@@ -59,54 +55,77 @@ def change_metadata(full_record_metadata, base_dir, input_dir, metadata_filename
     return full_record_metadata
 
 
-def get_name_to_checksum_for_input_folder_files(base_dir, input_dir, metadata_filename):
+def get_name_to_checksum_for_files_in_upload_dir(base_dir_path, upload_dir_path):
     """
-    Gets the names and md5 hashes of all files in the input folder, ignoring the metadata file
+    Gets the names and md5 hashes of all files in the upload folder
     """
-    input_dir_path = os.path.join(base_dir, input_dir)
+    upload_dir_path = os.path.join(base_dir_path, upload_dir_path)
 
     filenames = [
-        f for f in os.listdir(input_dir_path)
-        if (os.path.isfile(os.path.join(input_dir_path, f)) and f != metadata_filename)
+        f for f in os.listdir(upload_dir_path)
+        if os.path.isfile(os.path.join(upload_dir_path, f))
     ]
 
-    input_folder_files = []
+    files_in_upload_dir = []
 
     for filename in filenames:
-        file_path = os.path.join(input_dir_path, filename)
+        file_path = os.path.join(upload_dir_path, filename)
 
         with open(file_path, "rb") as f:
             file_hash = hashlib.md5()
             while chunk := f.read(8192):
                 file_hash.update(chunk)
 
-        input_folder_files.append(
+        files_in_upload_dir.append(
             {
                 'name': filename,
                 'checksum': 'md5:' + file_hash.hexdigest()
             })
 
-    return input_folder_files
+    return files_in_upload_dir
 
 
-def get_input_folder_files(base_dir, input_dir, metadata_filename):
+def get_data_files_in_upload_dir(base_dir_path, upload_dir_path):
     """
-    Gets the names of all files in the input folder, ignoring the metadata file
+    Gets the names of the files in the upload folder
     """
-    input_folder_files = get_name_to_checksum_for_input_folder_files(base_dir, input_dir, metadata_filename)
-    filenames = [f['name'] for f in input_folder_files]
-
+    files = get_name_to_checksum_for_files_in_upload_dir(base_dir_path, upload_dir_path)
+    filenames = [f['name'] for f in files]
     return filenames
 
-def export_capabilities_to_zip_file(base_dir, output_dir, filename, capabilities):
+def export_capabilities_to_zip_file(base_dir_path, output_dir, filename, capabilities):
     """
-    Puts each capability in the list in its own json file
-    Creates a zip file that contains all of these json files in the output folder
+    Puts each capability in the list in its own JSON file
+    Creates a ZIP file that contains all of these JSON files in the output folder
+    """
+    output_file_path = os.path.join(base_dir_path, output_dir, filename)
+    filenames = []
+
+    for c in capabilities:
+        quantity = c['quantity']
+        quantity = quantity.strip().replace(" ", "_") # Remove leading and trailing spaces and replace remaining spaces by _
+        method = c['method']
+        method = method.strip() # remove leading and trailing spaces
+        method = method.strip().replace(" ", "_")
+        file = f'{quantity}_{method}.json'
+        export_to_json_file(base_dir_path, output_dir, file, c)
+        filenames.append(file)
+
+    with ZipFile(output_file_path, 'w') as zf:
+        for file in filenames:
+            file_path = os.path.join(base_dir_path, output_dir, file)
+            zf.write(file_path, file, compress_type=ZIP_DEFLATED)
+            os.remove(file_path)
+
+def export_results_to_zip_file(base_dir, output_dir, filename, results):
+    """
+    Puts each result in the list in its own JSON file
+    Creates a ZIP file that contains all of these JSON files in the output folder
     """
     output_file_path = os.path.join(base_dir, output_dir, filename)
     filenames = []
 
-    for c in capabilities:
+    for r in results:
         quantity = c['quantity']
         quantity = quantity.strip().replace(" ", "_") # Remove leading and trailing spaces and replace remaining spaces by _
         method = c['method']
@@ -122,38 +141,31 @@ def export_capabilities_to_zip_file(base_dir, output_dir, filename, capabilities
             zf.write(file_path, file, compress_type=ZIP_DEFLATED)
             os.remove(file_path)
 
-def get_tenant_uuids(results_for_requests):
-    """
-    Extracts the tenant uuids from the obtained list of results [{}, {}, {}...]
-    """
-    tenant_uuids = [ r['result']['tenant_uuid'] for r in results_for_requests]
-    tenant_uuids = list(set(tenant_uuids)) # Remove duplicates
-    return tenant_uuids
-
-def get_token_for_archive_account(base_dir, filename, tenant_uuid, archive_domain_name):
-    """
-    Extracts the email address for a tenant's account on an archive from a file
-    """
-    file_path = os.path.join(base_dir, filename)
-
-    with open(file_path, 'r') as f:
-        archive_accounts_of_tenants = yaml.safe_load(f)
-
-    accounts = [t['archive_accounts'] for t in archive_accounts_of_tenants if t['finales_tenant_uuid'] == tenant_uuid]
-
-    if len(accounts) == 0:
-        raise Exception(f'No entry for the tenant with uuid {tenant_uuid} in the file {filename}')
-    elif len(accounts) > 1:
-        raise Exception(f'Multiple entries for the tenant with uuid {tenant_uuid} in the file {filename}')
-
-    tokens = [a['token'] for a in accounts[0] if a['domain_name'] == archive_domain_name]
-
-    if len(tokens) == 0:
-        raise Exception(f'No token for the tenant with uuid {tenant_uuid} on the archive {archive_domain_name}')
-    if len(tokens) > 1:
-        raise Exception(f'Multiple tokens for the tenant with uuid {tenant_uuid} on the archive {archive_domain_name}')
-
-    return tokens[0]
+# def get_tenant_uuids(results_for_requests):
+#     """
+#     Extracts the tenant uuids from the obtained list of results [{}, {}, {}...]
+#     """
+#     tenant_uuids = [ r['result']['tenant_uuid'] for r in results_for_requests]
+#     tenant_uuids = list(set(tenant_uuids)) # Remove duplicates
+#     return tenant_uuids
+#
+# def get_token(base_dir, filename, archive_domain_name):
+#     """
+#     Gets a personal access token for a user of a BIG-MAP Archive from a file
+#     """
+#     file_path = os.path.join(base_dir, filename)
+#
+#     with open(file_path, 'r') as f:
+#         accounts = yaml.safe_load(f)
+#
+#     tokens = [a['token'] for a in accounts if a['domain_name'] == archive_domain_name]
+#
+#     if len(tokens) == 0:
+#         raise Exception(f'No token for FINALES on the archive {archive_domain_name}')
+#     if len(tokens) > 1:
+#         raise Exception(f'Multiple tokens for FINALES on the archive {archive_domain_name}')
+#
+#     return tokens[0]
 
 # def group_result_uuids_by_tenant(base_dir, output_dir, data):
 #     """

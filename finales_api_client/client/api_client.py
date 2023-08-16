@@ -1,11 +1,3 @@
-import json
-import os
-from datetime import date
-
-from big_map_archive_api_client.client.rest_api_connection import RestAPIConnection
-from big_map_archive_api_client.utils import (generate_full_metadata,
-                                              change_metadata,
-                                              get_name_to_checksum_for_input_folder_files)
 from finales_api_client.client.rest_api_connection import FinalesRestAPIConnection
 
 

@@ -1,0 +1,74 @@
+[
+    {
+        "ctime": "2023-08-14T09:13:50",
+        "result": {
+            "data": {
+                "reservation_id": "no-apply",
+                "success": true
+            },
+            "method": [
+                "service"
+            ],
+            "parameters": {
+                "service": {
+                    "cycling_protocol": "normal",
+                    "number_cycles": 100,
+                    "number_required_channels": 5
+                }
+            },
+            "quantity": "cycling_channel",
+            "request_uuid": "c88a808e-a417-416a-b441-6250505680de",
+            "tenant_uuid": "ad771155-97b9-46e9-92bd-5e9b2c378a0a"
+        },
+        "status": "original",
+        "uuid": "d7b4bda2-4eef-40b3-a2f4-528648360030"
+    },
+    {
+        "ctime": "2023-08-14T09:13:50",
+        "result": {
+            "data": {
+                "reservation_id": "no-apply",
+                "success": true
+            },
+            "method": [
+                "service"
+            ],
+            "parameters": {
+                "service": {
+                    "cycling_protocol": "normal",
+                    "number_cycles": 100,
+                    "number_required_channels": 5
+                }
+            },
+            "quantity": "cycling_channel",
+            "request_uuid": "h99a808e-a417-416a-b441-6250505680de",
+            "tenant_uuid": "ad771155-97b9-46e9-92bd-5e9b2c378a0a"
+        },
+        "status": "original",
+        "uuid": "r7b4bda2-4eef-40b3-a2f4-528648360031"
+    },
+    {
+        "ctime": "2023-08-14T10:20:11",
+        "result": {
+            "data": {
+                "reservation_id": "no-apply",
+                "success": true
+            },
+            "method": [
+                "service"
+            ],
+            "parameters": {
+                "service": {
+                    "cycling_protocol": "normal",
+                    "number_cycles": 100,
+                    "number_required_channels": 5
+                }
+            },
+            "quantity": "cycling_channel",
+            "request_uuid": "1cc3f8ba-b953-408e-af33-d859a252b85d",
+            "tenant_uuid": "e0262ca0-c546-4e9a-a4a1-5ea6cb9b1e13"
+        },
+        "status": "original",
+        "uuid": "c289592b-0603-4b88-b0ab-675f4624da9a"
+    }
+]
