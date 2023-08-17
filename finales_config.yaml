@@ -1,2 +1,2 @@
-ip_address: 0.0.0.0 # Ip address of the finales server
-port: 13371 # Port for the finales server
+ip_address: 0.0.0.0 # Ip address of a local FINALES server
+port: 13371 # Port for a local FINALES server
