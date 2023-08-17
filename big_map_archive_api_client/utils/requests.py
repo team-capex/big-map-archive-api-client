@@ -2,7 +2,7 @@ import json
 import os
 import hashlib
 from zipfile import (ZipFile, ZIP_DEFLATED)
-
+from datetime import datetime
 
 def generate_full_metadata(metadata_file_path):
     """
@@ -21,6 +21,10 @@ def generate_full_metadata(metadata_file_path):
 
     with open(metadata_file_path, 'r') as f:
         partial_metadata = json.load(f)
+
+    # Insert date and time in the description
+    now = datetime.now()
+    partial_metadata['description'] += f' This operation was performed on {now.date()} at {now.strftime("%H:%M:%S")}.'
 
     full_metadata['metadata'] = partial_metadata
     return full_metadata
@@ -43,14 +47,18 @@ def change_metadata(full_record_metadata, base_dir_path, metadata_file_path):
     """
     file_path = os.path.join(base_dir_path, metadata_file_path)
     with open(file_path, 'r') as f:
-        metadata = json.load(f)
+        partial_metadata = json.load(f)
+
+    # Insert date and time in the description
+    now = datetime.now()
+    partial_metadata['description'] += f' This operation was performed on {now.date()} at {now.strftime("%H:%M:%S")}.'
 
     if full_record_metadata['is_published']:
         publication_date = full_record_metadata['metadata']['publication_date']
-        full_record_metadata['metadata'] = metadata
+        full_record_metadata['metadata'] = partial_metadata
         full_record_metadata['metadata']['publication_date'] = publication_date
     else:
-        full_record_metadata['metadata'] = metadata
+        full_record_metadata['metadata'] = partial_metadata
 
     return full_record_metadata
 

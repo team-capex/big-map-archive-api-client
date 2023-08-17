@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from datetime import datetime
 from big_map_archive_api_client.client.client_config import ClientConfig
 from big_map_archive_api_client.utils import (get_data_files_in_upload_dir,
                                               export_to_json_file)
@@ -200,7 +201,7 @@ def back_up_finales_db(finales_username,
     if number_of_latest_versions == 0:
         # Create a first record version
         record_id = create_record(archive_token,
-                                  metadata_file_path='data/input/finales_metadata.json',
+                                  metadata_file_path='data/input/metadata.json',
                                   upload_dir_path='data/output',
                                   publish=True)
         return record_id
@@ -214,7 +215,7 @@ def back_up_finales_db(finales_username,
             record_id = update_published_record(archive_token,
                                                 id,
                                                 new_version=True,
-                                                metadata_file_path='data/input/finales_metadata.json',
+                                                metadata_file_path='data/input/metadata.json',
                                                 upload_dir_path='data/output',
                                                 force=False,
                                                 publish=True)
