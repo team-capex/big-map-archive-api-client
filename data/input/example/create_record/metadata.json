@@ -30,7 +30,7 @@
       }
     }
   ],
-  "description": "<p>Accurate first-principles predictions of the structural, electronic, magnetic, and electrochemical properties of cathode materials can be key in the design of novel efficient Li-ion batteries...</p>",
+  "description": "All capabilities and all results for requests were copied from the FINALES' production database.",
   "publisher": "BIG-MAP Archive",
   "related_identifiers": [
     {
@@ -76,5 +76,5 @@
       "subject": "DFT+V"
     }
   ],
-  "title": "Inter-site Hubbard interactions in Li-ion cathode rods"
+  "title": "Partial back-up of the FINALES' production database"
 }
