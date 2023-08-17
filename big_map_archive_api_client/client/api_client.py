@@ -304,16 +304,16 @@ class ArchiveAPIClient:
         response.raise_for_status()
         return response.json()
 
-    def get_published_latest_version_ids(self):
+    def get_latest_versions(self):
         """
-        Gets the ids of the latest versions that are published for a user on a BIG-MAP Archive
+        Gets the ids and the statuses of the latest record versions belonging to a user on a BIG-MAP Archive
         """
         all_versions = False
         response_size = int(float('1e6'))
         response = self.get_user_records(all_versions, response_size)
         latest_versions = response['hits']['hits']
-        ids = [v['id'] for v in latest_versions if v['is_published']]
-        return ids
+        latest_versions = [{'id': v['id'], 'is_published': v['is_published']} for v in latest_versions]
+        return latest_versions
 
 
 

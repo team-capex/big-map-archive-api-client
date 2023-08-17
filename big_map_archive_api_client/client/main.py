@@ -160,13 +160,11 @@ def back_up_finales_db(finales_username,
     """
     Saves capabilities and results for requests stored in a FINALES database to a BIG-MAP Archive
 
-    :param finales_username: username for an account on FINALES
+    :param finales_username: username for an account on the FINALES server
     :param finales_password: password for the account
     :param archive_token: personal access token for the FINALES account on the selected BIG-MAP Archive
-    :param capabilities_file_path: relative path to the file where all capabilities
-    that are obtained from FINALES API are stored
-    :param results_file_path: relative path to the file where all results for requests
-    that are obtained from FINALES API are stored
+    :param capabilities_file_path: relative path to the local file for all capabilities obtained from the FINALES server
+    :param results_file_path: to the local file for all results for requests obtained from the FINALES server
     """
     base_dir_path = Path(__file__).absolute().parent.parent.parent
     config_file_path = os.path.join(base_dir_path, 'finales_config.yaml')
@@ -187,64 +185,6 @@ def back_up_finales_db(finales_username,
     # Get all results associated with requests stored in the FINALES database
     response = client.get_results_requested(finales_token)
 
-    # TODO: remove after testing
-    response = [
-        {'uuid': 'd7b4bda2-4eef-40b3-a2f4-528648360030',
-         'ctime': '2023-08-14T09:13:50',
-         'status': 'original',
-         'result': {
-             'data': {
-                 'success': True,
-                 'reservation_id': 'no-apply'},
-             'quantity': 'cycling_channel',
-             'method': ['service'],
-             'parameters': {
-                 'service': {
-                     'number_required_channels': 5,
-                     'cycling_protocol': 'normal',
-                     'number_cycles': 100}
-             },
-             'tenant_uuid': 'ad771155-97b9-46e9-92bd-5e9b2c378a0a',
-             'request_uuid': 'c88a808e-a417-416a-b441-6250505680de'}
-         },
-        {'uuid': 'r7b4bda2-4eef-40b3-a2f4-528648360031',
-         'ctime': '2023-08-14T09:13:50',
-         'status': 'original',
-         'result': {
-             'data': {
-                 'success': True,
-                 'reservation_id': 'no-apply'},
-             'quantity': 'cycling_channel',
-             'method': ['service'],
-             'parameters': {
-                 'service': {
-                     'number_required_channels': 5,
-                     'cycling_protocol': 'normal',
-                     'number_cycles': 100}
-             },
-             'tenant_uuid': 'ad771155-97b9-46e9-92bd-5e9b2c378a0a',
-             'request_uuid': 'h99a808e-a417-416a-b441-6250505680de'}
-         },
-        {'uuid': 'c289592b-0603-4b88-b0ab-675f4624da9a',
-         'ctime': '2023-08-14T10:20:11',
-         'status': 'original',
-         'result': {
-             'data': {
-                 'success': True,
-                 'reservation_id': 'no-apply'},
-             'quantity': 'cycling_channel',
-             'method': ['service'],
-             'parameters': {
-                 'service': {
-                     'number_required_channels': 5,
-                     'cycling_protocol': 'normal',
-                     'number_cycles': 100}
-             },
-             'tenant_uuid': 'e0262ca0-c546-4e9a-a4a1-5ea6cb9b1e13',
-             'request_uuid': '1cc3f8ba-b953-408e-af33-d859a252b85d'}
-         },
-    ]
-
     # If at least one result is found, generate a JSON file that contains each found result
     if len(response) > 0:
         export_to_json_file(base_dir_path, results_file_path, response)
@@ -253,41 +193,35 @@ def back_up_finales_db(finales_username,
     config_file_path = os.path.join(base_dir_path, 'archive_config.yaml')
     client_config = ClientConfig.load_from_config_file(config_file_path)
     client = client_config.create_client(archive_token)
-    ids = client.get_published_latest_version_ids()
-    number_of_ids = len(ids)
+    latest_versions = client.get_latest_versions()
+    number_of_latest_versions = len(latest_versions)
 
     # Only zero or one id is allowed
-    if number_of_ids == 0:
+    if number_of_latest_versions == 0:
         # Create a first record version
         record_id = create_record(archive_token,
                                   metadata_file_path='data/input/finales_metadata.json',
                                   upload_dir_path='data/output',
                                   publish=True)
-    elif number_of_ids == 1:
-        # TODO: check that if content of capabilities.json or results.json is the same as that in the previous version, no upload but link to file
-        # Update current version
-        record_id = update_published_record(archive_token,
-                                            ids[0],
-                                            new_version=True,
-                                            metadata_file_path='data/input/finales_metadata.json',
-                                            upload_dir_path='data/output',
-                                            force=False,
-                                            publish=True)
-    else:
-        raise Exception(
-            f'{len(ids)} published latest versions for the FINALES account on the archive {client_config.domain_name}. Which one to update?')
+        return record_id
 
-    return record_id
+    if number_of_latest_versions == 1:
+        id = latest_versions[0]['id']
+        is_published = latest_versions[0]['is_published']
 
+        if is_published:
+            # Update the current record version
+            record_id = update_published_record(archive_token,
+                                                id,
+                                                new_version=True,
+                                                metadata_file_path='data/input/finales_metadata.json',
+                                                upload_dir_path='data/output',
+                                                force=False,
+                                                publish=True)
 
-if __name__ == '__main__':
-    archive_token = ''
-    # record_id = create_record(archive_token)
-    # record_id = 'xfz41-pn366'
-    # retrieve_published_record(archive_token, record_id)
-    # retrieve_published_records(archive_token, all_versions=False)
-    # record_id = update_published_record(archive_token, record_id)
-    finales_username = ''
-    finales_password = ''
-    record_id = back_up_finales_db(finales_username, finales_password, archive_token)
-    print(record_id)
+            return record_id
+        else:
+            raise Exception('The latest version is not published')
+
+    raise Exception('Multiple latest versions')
+
