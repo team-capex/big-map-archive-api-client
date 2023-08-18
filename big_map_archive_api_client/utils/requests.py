@@ -53,6 +53,10 @@ def change_metadata(full_record_metadata, base_dir_path, metadata_file_path):
     now = datetime.now()
     partial_metadata['description'] += f' This operation was performed on {now.date()} at {now.strftime("%H:%M:%S")}.'
 
+    # Insert keywords extracted from results (e.g., values for 'quantity' and 'method') if not already in 'keywords'
+    #keywords = extract_keywords(partial_metadata)
+    #keyword_candidates
+
     if full_record_metadata['is_published']:
         publication_date = full_record_metadata['metadata']['publication_date']
         full_record_metadata['metadata'] = partial_metadata
@@ -149,64 +153,6 @@ def export_results_to_zip_file(base_dir, output_dir, filename, results):
             zf.write(file_path, file, compress_type=ZIP_DEFLATED)
             os.remove(file_path)
 
-# def get_tenant_uuids(results_for_requests):
-#     """
-#     Extracts the tenant uuids from the obtained list of results [{}, {}, {}...]
-#     """
-#     tenant_uuids = [ r['result']['tenant_uuid'] for r in results_for_requests]
-#     tenant_uuids = list(set(tenant_uuids)) # Remove duplicates
-#     return tenant_uuids
-#
-# def get_token(base_dir, filename, archive_domain_name):
-#     """
-#     Gets a personal access token for a user of a BIG-MAP Archive from a file
-#     """
-#     file_path = os.path.join(base_dir, filename)
-#
-#     with open(file_path, 'r') as f:
-#         accounts = yaml.safe_load(f)
-#
-#     tokens = [a['token'] for a in accounts if a['domain_name'] == archive_domain_name]
-#
-#     if len(tokens) == 0:
-#         raise Exception(f'No token for FINALES on the archive {archive_domain_name}')
-#     if len(tokens) > 1:
-#         raise Exception(f'Multiple tokens for FINALES on the archive {archive_domain_name}')
-#
-#     return tokens[0]
-
-# def group_result_uuids_by_tenant(base_dir, output_dir, data):
-#     """
-#     Gives the result uuids grouped by tenant
-#     Starting from a list of results [{}, {}, {}...], we get [[{}, {}, {}...], [{}, {}, {}...], [{}, {}, {}...]...],
-#     where each internal list corresponds to all result uuids for a given tenant
-#     """
-#     results = [
-#         {
-#             'tenant_uuid': r['result']['tenant_uuid'],
-#             'result_uuid': r['uuid']
-#         } for r in data]
-#     key_func = lambda x: x['tenant_uuid']
-#     results = sorted(results, key=key_func) # Order by tenant_uuid
-#     lists_of_results = [list(group) for (k, group) in groupby(results, key=key_func)] # Group results by tenant_uuid
-#     return lists_of_results
-#
-# def get_archive_token(base_dir, archives_for_tenants_filename, tenant_uuid, archive_domain_name):
-#     """
-#     Gets a personal access token of a tenant for an archive from a file
-#     """
-#     file_path = os.path.join(base_dir, archives_for_tenants_filename)
-#
-#     with open(file_path, 'r') as f:
-#         tenant_archive_couples = json.load(f)
-#
-#     tokens = [tac['archive_token'] for tac in tenant_archive_couples
-#               if (tac['finales_tenant_uuid'] == tenant_uuid and tac['archive_domain_name'] == archive_domain_name)]
-#
-#     if len(tokens) != 1:
-#         raise Exception(f'Number of tokens for tenant {tenant_uuid} on {archive_domain_name}: {len(tokens)}')
-#
-#     return tokens[0]
 
 
 

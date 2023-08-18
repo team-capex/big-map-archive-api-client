@@ -1,6 +1,6 @@
 from pathlib import Path
 import os
-from datetime import datetime
+from dotenv import load_dotenv
 from big_map_archive_api_client.client.client_config import ClientConfig
 from big_map_archive_api_client.utils import (get_data_files_in_upload_dir,
                                               export_to_json_file)
@@ -201,7 +201,7 @@ def back_up_finales_db(finales_username,
     if number_of_latest_versions == 0:
         # Create a first record version
         record_id = create_record(archive_token,
-                                  metadata_file_path='data/input/metadata.json',
+                                  metadata_file_path='data/input/finales_metadata.json',
                                   upload_dir_path='data/output',
                                   publish=True)
         return record_id
@@ -215,7 +215,7 @@ def back_up_finales_db(finales_username,
             record_id = update_published_record(archive_token,
                                                 id,
                                                 new_version=True,
-                                                metadata_file_path='data/input/metadata.json',
+                                                metadata_file_path='data/input/finales_metadata.json',
                                                 upload_dir_path='data/output',
                                                 force=False,
                                                 publish=True)
@@ -233,3 +233,19 @@ def back_up_finales_db(finales_username,
     raise Exception('Multiple latest versions')
 
 
+if __name__ == '__main__':
+    # Create environment variables from secrets.env
+    base_dir_path = Path(__file__).absolute().parent.parent.parent
+    load_dotenv(os.path.join(base_dir_path, 'secrets.env'))
+
+    archive_token = os.getenv('ARCHIVE_TOKEN')
+    finales_username = os.getenv('FINALES_USERNAME')
+    finales_password = os.getenv('FINALES_PASSWORD')
+
+    # record_id = create_record(archive_token, current_date_time)
+    # record_id = 'xfz41-pn366'
+    # retrieve_published_record(archive_token, record_id)
+    # retrieve_published_records(archive_token, all_versions=False)
+    # record_id = update_published_record(archive_token, record_id, current_date_time)
+    record_id = back_up_finales_db(finales_username, finales_password, archive_token)
+    print(record_id)
