@@ -97,6 +97,15 @@ class ArchiveAPIClient:
         response.raise_for_status()
         return response.json()
 
+    def delete_draft(self, record_id):
+        """
+        Deletes a draft
+        Raises an HTTPError exception if the request fails
+        """
+        resource_path = f'/api/records/{record_id}/draft'
+        response = self._connection.delete(resource_path, self._token)
+        response.raise_for_status()
+
     def insert_publication_date(self, record_id):
         """
         Inserts a publication date into a record's metadata

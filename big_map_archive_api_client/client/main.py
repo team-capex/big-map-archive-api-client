@@ -221,8 +221,16 @@ def back_up_finales_db(finales_username,
                                                 publish=True)
 
             return record_id
-        else:
-            raise Exception('The latest version is not published')
+
+        # The latest version is in status 'draft'
+        client.delete_draft(id)
+        record_id = back_up_finales_db(finales_username,
+                           finales_password,
+                           archive_token,
+                           capabilities_file_path,
+                           results_file_path)
+        return record_id
 
     raise Exception('Multiple latest versions')
+
 
