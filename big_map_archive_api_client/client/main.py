@@ -219,7 +219,6 @@ def back_up_finales_db(finales_username,
                                                 upload_dir_path='data/output',
                                                 force=False,
                                                 publish=True)
-
             return record_id
 
         # The latest version is in status 'draft'
