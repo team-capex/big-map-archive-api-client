@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 from big_map_archive_api_client.client.client_config import ClientConfig
 from big_map_archive_api_client.utils import (get_data_files_in_upload_dir,
                                               export_to_json_file)
@@ -9,8 +10,9 @@ from finales_api_client.client.client_config import FinalesClientConfig
 
 
 def create_record(token,
-                  metadata_file_path='data/input/metadata.json',
+                  metadata_file_path='data/input/metadata.yaml',
                   upload_dir_path='data/input/upload',
+                  additional_description='',
                   publish=True):
     """
     Creates a record on a BIG-MAP Archive and, optionally, publishes it.
@@ -18,6 +20,7 @@ def create_record(token,
     :param token: personal access token for the archive
     :param metadata_file_path: relative path to the metadata file used for creating a record (title, list of authors...)
     :param upload_dir_path: relative path to the directory where files to be uploaded to the archive and to be linked to the newly created record are located
+    :param additional_description: text that will be appended to the description taken from the metadata file
     :param publish: whether the created record (draft) should be published or not
     :return: the id of the created record
     """
@@ -26,8 +29,8 @@ def create_record(token,
     client_config = ClientConfig.load_from_config_file(config_file_path)
     client = client_config.create_client(token)
 
-    # Create draft from input metadata.json
-    response = client.post_records(base_dir_path, metadata_file_path)
+    # Create draft from input metadata.yaml
+    response = client.post_records(base_dir_path, metadata_file_path, additional_description)
     record_id = response['id']
 
     # Upload data files and insert links in the draft's metadata
@@ -197,12 +200,16 @@ def back_up_finales_db(finales_username,
     latest_versions = client.get_latest_versions()
     number_of_latest_versions = len(latest_versions)
 
+    now = datetime.now()
+    additional_description = f' This operation was performed on {now.strftime("%B %-d, %Y")} at {now.strftime("%H:%M")}.'
+
     # Only zero or one id is allowed
     if number_of_latest_versions == 0:
         # Create a first record version
         record_id = create_record(archive_token,
                                   metadata_file_path='data/input/finales_metadata.json',
                                   upload_dir_path='data/output',
+                                  additional_description=additional_description,
                                   publish=True)
         return record_id
 
@@ -242,10 +249,12 @@ if __name__ == '__main__':
     finales_username = os.getenv('FINALES_USERNAME')
     finales_password = os.getenv('FINALES_PASSWORD')
 
-    # record_id = create_record(archive_token, current_date_time)
+    now = datetime.now()
+    additional_description = f' This operation was performed on {now.strftime("%B %-d, %Y")} at {now.strftime("%H:%M")}.'
+    record_id = create_record(archive_token, additional_description=additional_description)
     # record_id = 'xfz41-pn366'
     # retrieve_published_record(archive_token, record_id)
     # retrieve_published_records(archive_token, all_versions=False)
     # record_id = update_published_record(archive_token, record_id, current_date_time)
-    record_id = back_up_finales_db(finales_username, finales_password, archive_token)
+    # record_id = back_up_finales_db(finales_username, finales_password, archive_token)
     print(record_id)
