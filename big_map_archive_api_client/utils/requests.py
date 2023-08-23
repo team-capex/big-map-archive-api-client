@@ -102,10 +102,10 @@ def insert_creators(full_metadata, partial_metadata):
 
 def insert_rights(full_metadata, partial_metadata):
     """
-    "BIG-MAP Archive License", "Creative Commons Attribution Share Alike 4.0 International", "MIT License"
-    :param metadata:
-    :param partial_metadata:
-    :return:
+    Inserts a right (i.e., a license) that was extracted from a 'partial' metadata into a 'full' metadata. Only the following licenses are accepted:
+      - 'BIG-MAP Archive License'
+      - 'Creative Commons Attribution Share Alike 4.0 International'
+      - 'MIT License'
     """
     full_metadata['metadata']['rights'] = [{
         'description': {
