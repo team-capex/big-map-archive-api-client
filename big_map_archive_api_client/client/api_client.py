@@ -27,8 +27,7 @@ class ArchiveAPIClient:
         Returns the newly created draft's id
         """
         resource_path = '/api/records'
-        metadata_file_path = os.path.join(base_dir_path, metadata_file_path)
-        metadata = generate_full_metadata(metadata_file_path, additional_description)
+        metadata = generate_full_metadata(base_dir_path, metadata_file_path, additional_description)
         payload = json.dumps(metadata)
         response = self._connection.post(resource_path, self._token, payload)
         response.raise_for_status()
@@ -195,13 +194,13 @@ class ArchiveAPIClient:
         response.raise_for_status()
         return response.json()
 
-    def update_metadata(self, record_id, base_dir_path, metadata_file_path):
+    def update_metadata(self, record_id, base_dir_path, metadata_file_path, additional_description):
         """
         Updates the metadata of a draft using a file's content
         """
-        metadata = self.get_draft(record_id)
-        metadata = change_metadata(metadata, base_dir_path, metadata_file_path)
-        self.put_draft(record_id, metadata)
+        record_metadata = self.get_draft(record_id)
+        record_metadata = change_metadata(record_metadata, base_dir_path, metadata_file_path, additional_description)
+        self.put_draft(record_id, record_metadata)
 
     def upload_files(self, record_id, base_dir_path, upload_dir_path, filenames):
         """
@@ -280,7 +279,7 @@ class ArchiveAPIClient:
     def get_links_to_delete(self, record_id, base_dir_path, upload_dir_path, force):
         """
         Reasons for deleting a file link in a draft:
-        - the linked file is not in the input folder and "force: true" in config.yaml
+        - the linked file is not in the input folder and "discard: true" in config.yaml
         - a file with the same name as the linked file appears in the input folder but its content is different (md5 hash)
         """
         filenames = self.get_changed_content_files(record_id, base_dir_path, upload_dir_path)
@@ -315,7 +314,7 @@ class ArchiveAPIClient:
 
     def get_latest_versions(self):
         """
-        Gets the ids and the statuses of the latest record versions belonging to a user on a BIG-MAP Archive
+        Gets the ids and the statuses of the latest version of all entries belonging to a user
         """
         all_versions = False
         response_size = int(float('1e6'))
@@ -323,6 +322,14 @@ class ArchiveAPIClient:
         latest_versions = response['hits']['hits']
         latest_versions = [{'id': v['id'], 'is_published': v['is_published']} for v in latest_versions]
         return latest_versions
+
+    def exists_and_is_published(self, record_id):
+        """
+        Raises an exception if a version of an entry does not exist or is not published
+        """
+        self.get_record(record_id)
+
+
 
 
 
