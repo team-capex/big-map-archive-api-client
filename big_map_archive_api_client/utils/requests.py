@@ -39,7 +39,7 @@ def generate_full_metadata(metadata_file_path, additional_description):
     full_metadata = insert_creators(full_metadata, partial_metadata)
     full_metadata['metadata']['description'] = partial_metadata['description'] + additional_description
     full_metadata = insert_rights(full_metadata, partial_metadata)
-    full_metadata['metadata']['subjects'] = [{'subject': keyword} for keyword in partial_metadata['keywords']]
+    full_metadata = insert_subjects(full_metadata, partial_metadata)
     full_metadata = insert_related_identifiers(full_metadata, partial_metadata)
 
     return full_metadata
@@ -143,6 +143,15 @@ def insert_rights(full_metadata, partial_metadata):
         full_metadata['metadata']['rights'][0]['title']['en'] = 'MIT License'
     else:
         raise Exception(f'Invalid license {partial_metadata["license"]} in the input metadata file')
+
+    return full_metadata
+
+
+def insert_subjects(full_metadata, partial_metadata):
+    """
+    Inserts subjects (i.e., keywords) that were extracted from a 'partial' metadata into a 'full' metadata
+    """
+    full_metadata ['metadata']['subjects'] = [{'subject': keyword} for keyword in partial_metadata['keywords']]
 
     return full_metadata
 
