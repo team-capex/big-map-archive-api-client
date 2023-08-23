@@ -37,8 +37,6 @@ def generate_full_metadata(metadata_file_path, additional_description):
     full_metadata = insert_resource_type(full_metadata, partial_metadata)
     full_metadata['metadata']['title'] = partial_metadata['title']
     full_metadata = insert_creators(full_metadata, partial_metadata)
-
-    # Insert date and time in the description
     full_metadata['metadata']['description'] = partial_metadata['description'] + additional_description
     full_metadata = insert_rights(full_metadata, partial_metadata)
     full_metadata['metadata']['subjects'] = [{'subject': keyword} for keyword in partial_metadata['keywords']]
@@ -49,7 +47,7 @@ def generate_full_metadata(metadata_file_path, additional_description):
 
 def insert_resource_type(full_metadata, partial_metadata):
     """
-    Inserts a resource type into a "full" metadata that was extracted from a "partial" metadata
+    Inserts a resource type that was extracted from a 'partial' metadata into a 'full' metadata
     Raises an exception if the extracted resource type is different from 'Dataset', 'Software', or 'Other'
     """
     full_metadata['metadata']['resource_type'] = {
@@ -76,10 +74,7 @@ def insert_resource_type(full_metadata, partial_metadata):
 
 def insert_creators(full_metadata, partial_metadata):
     """
-
-    :param metadata:
-    :param partial_metadata:
-    :return:
+    Inserts creators (i.e., authors) that were extracted from a 'partial' metadata into a 'full' metadata
     """
     authors = partial_metadata['authors']
     for author in authors:
