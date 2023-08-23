@@ -8,7 +8,7 @@ import yaml
 
 def generate_full_metadata(metadata_file_path, additional_description):
     """
-    Generates a record's full metadata from a file containing only partial metadata
+    Generates a record's full metadata from a YAML file containing only partial metadata
     """
     full_metadata = {
         'access': {
@@ -47,6 +47,33 @@ def generate_full_metadata(metadata_file_path, additional_description):
     return full_metadata
 
 
+def insert_resource_type(full_metadata, partial_metadata):
+    """
+    Inserts a resource type into a "full" metadata that was extracted from a "partial" metadata
+    Raises an exception if the extracted resource type is different from 'Dataset', 'Software', or 'Other'
+    """
+    full_metadata['metadata']['resource_type'] = {
+        'id': '',
+        'title': {
+            'en': ''
+        }
+    }
+
+    if partial_metadata['resource_type'] == 'Dataset':
+        full_metadata['metadata']['resource_type']['id'] = 'dataset'
+        full_metadata['metadata']['resource_type']['title']['en'] = 'Dataset'
+    elif partial_metadata['resource_type'] == 'Software':
+        full_metadata['metadata']['resource_type']['id'] = 'software'
+        full_metadata['metadata']['resource_type']['title']['en'] = 'Software'
+    elif partial_metadata['resource_type'] == 'Other':
+        full_metadata['metadata']['resource_type']['id'] = 'other'
+        full_metadata['metadata']['resource_type']['title']['en'] = 'Other'
+    else:
+        raise Exception(f'Invalid resource type {partial_metadata["resource_type"]} in the input metadata file')
+
+    return full_metadata
+
+
 def insert_creators(full_metadata, partial_metadata):
     """
 
@@ -77,38 +104,6 @@ def insert_creators(full_metadata, partial_metadata):
 
     return full_metadata
 
-def insert_resource_type(full_metadata, partial_metadata):
-    """
-
-    :param metadata:
-    :param partial_metadata:
-    :return:
-    """
-    if partial_metadata['resource_type'] == 'Dataset':
-        full_metadata['metadata']['resource_type'] = {
-            'id': 'dataset',
-            'title': {
-                'en': 'Dataset'
-            }
-        }
-    elif partial_metadata['resource_type'] == 'Software':
-        full_metadata['metadata']['resource_type'] = {
-            'id': 'software',
-            'title': {
-                'en': 'Software'
-            }
-        }
-    elif partial_metadata['resource_type'] == 'Other':
-        full_metadata['metadata']['resource_type'] = {
-            'id': 'other',
-            'title': {
-                'en': 'Other'
-            }
-        }
-    else:
-        raise Exception(f'Invalid resource type {partial_metadata["resource_type"]} in the input metadata file')
-
-    return full_metadata
 
 def insert_rights(full_metadata, partial_metadata):
     """
