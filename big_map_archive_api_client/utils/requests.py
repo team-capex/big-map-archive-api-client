@@ -77,6 +77,7 @@ def insert_creators(full_metadata, partial_metadata):
     Inserts creators (i.e., authors) that were extracted from a 'partial' metadata into a 'full' metadata
     """
     authors = partial_metadata['authors']
+
     for author in authors:
         creator = {
             'affiliations': [],
@@ -158,16 +159,19 @@ def insert_subjects(full_metadata, partial_metadata):
 
 def insert_related_identifiers(full_metadata, partial_metadata):
     """
-
-    :param full_metadata:
-    :param partial_metadata:
-    :return:
+    Inserts related identifiers (i.e., references) that were extracted from a 'partial' metadata into a 'full' metadata. Only the following reference schemes are accepted:
+      - 'arxiv'
+      - 'doi'
+      - 'isbn'
+      - 'url'
     """
     references = partial_metadata['references']
+
     for reference in references:
         if reference['scheme'] not in ['arxiv', 'doi', 'isbn', 'url']:
             raise Exception(f'Invalid reference scheme {reference["scheme"]} in the input metadata file')
 
+    for reference in references:
         related_identifier = {
             'identifier': reference['identifier'],
             'relation_type': {
