@@ -94,23 +94,23 @@ def retrieve_published_records(token,
 
 def update_published_record(token,
                             record_id,
-                            new_version=True,
-                            metadata_file_path='data/input/metadata.json',
+                            force=True,
+                            metadata_file_path='data/input/metadata.yaml',
                             upload_dir_path='data/input/upload',
-                            force=False,
+                            additional_description='',
+                            discard=True,
                             publish=True):
     """
-    Updates a published record by either modifying the current version or creating a new version and, optionally, publishing it.
+    Updates an entry by either modifying its latest version, which should be published, or creating a new version and publishing it.
+    Raises an exception if the latest version does not exist or is not published
 
     :param token: personal access token for the archive
-    :param record_id: id of the published record to update
-    :param new_version: whether a new record version should be created
-    :param metadata_file_path: relative path to the metadata file used for updating a record (title, list of authors...)
-    :param upload_dir_path: relative path to the directory where files to be uploaded to the archive and to be linked to the updated record are located
-    :param force: whether the new version should contain file links only for data files in the input folder
-    (note that if such a file is already linked to the previous version, the link is simply imported, avoiding an extra upload)
-    or the new version may also contain file links imported from the previous version for data files that do not appear in the input folder
-    :param publish: whether the new version should be published
+    :param record_id: id of the latest version of the entry
+    :param force: whether a new version should be created - for 'force=False', only the metadata can be modified
+    :param metadata_file_path: relative path to the metadata file (title, list of authors...)
+    :param upload_dir_path: relative path to the directory where data files to be linked to the new version are located
+    :param discard: whether file links from the previous version should be discarded (i.e., not imported) when considering the new version, with the exception of the links for data files currently in the upload folder
+    :param publish: whether the new version should be published or not
     :return: the id of the updated version or the new version
     """
     base_dir_path = Path(__file__).absolute().parent.parent.parent
@@ -118,37 +118,42 @@ def update_published_record(token,
     client_config = ClientConfig.load_from_config_file(config_file_path)
     client = client_config.create_client(token)
 
-    if not new_version:
-        # Create a draft (same version) and get the draft's id (same id)
+    client.exists_and_is_published(record_id)
+
+    if not force:
+        # Update the latest version
+        # 1. Create a draft (same version) and get the draft's id (same id)
         response = client.post_draft(record_id)
         record_id = response['id']  # Unchanged value for record_id
 
-        # Update the draft's metadata
-        client.update_metadata(record_id, base_dir_path, metadata_file_path)
+        # 2. Update the draft's metadata
+        client.update_metadata(record_id, base_dir_path, metadata_file_path, additional_description)
 
-        # Publish the draft (update published record)
+        # 3. Publish the draft (update published record)
         client.post_publish(record_id)
     else:
-        # Create a draft (new version) and get its id
+        # Create and publish a new version
+        # 1. Create a draft (new version) and get its id
         response = client.post_versions(record_id)
         record_id = response['id']  # Modified value for record_id
 
-        # Update the draft's metadata
-        client.update_metadata(record_id, base_dir_path, metadata_file_path)
+        # 2. Update the draft's metadata
+        client.update_metadata(record_id, base_dir_path, metadata_file_path, additional_description)
 
-        # Import all file links from the previous version
+        # 3. Import all file links from the previous version
         filenames = client.get_links(record_id)
         client.delete_links(record_id, filenames)
         client.post_file_import(record_id)
 
-        # Get file links to remove and remove them
-        filenames = client.get_links_to_delete(record_id, base_dir_path, upload_dir_path, force)
+        # 4. Get file links to remove and remove them
+        filenames = client.get_links_to_delete(record_id, base_dir_path, upload_dir_path, discard)
         client.delete_links(record_id, filenames)
 
-        # Get list of files to upload and upload them
+        # 5. Get list of files to upload and upload them
         filenames = client.get_files_to_upload(record_id, base_dir_path, upload_dir_path)
         client.upload_files(record_id, base_dir_path, upload_dir_path, filenames)
 
+        # 6. Publish (optional)
         if publish:
             client.insert_publication_date(record_id)
             client.post_publish(record_id)
@@ -231,20 +236,20 @@ def back_up_finales_db(finales_username,
             # Update the current record version
             record_id = update_published_record(archive_token,
                                                 id,
-                                                new_version=True,
+                                                force=True,
                                                 metadata_file_path='data/input/finales_metadata.json',
                                                 upload_dir_path='data/output',
-                                                force=False,
+                                                discard=False,
                                                 publish=True)
             return record_id
 
         # The latest version is in status 'draft'
         client.delete_draft(id)
         record_id = back_up_finales_db(finales_username,
-                           finales_password,
-                           archive_token,
-                           capabilities_file_path,
-                           results_file_path)
+                                       finales_password,
+                                       archive_token,
+                                       capabilities_file_path,
+                                       results_file_path)
         return record_id
 
     raise Exception('Multiple latest versions')
@@ -261,10 +266,16 @@ if __name__ == '__main__':
 
     now = datetime.now()
     additional_description = f' This operation was performed on {now.strftime("%B %-d, %Y")} at {now.strftime("%H:%M")}.'
-    record_id = create_record(archive_token, additional_description=additional_description)
-    # record_id = 'xfz41-pn366'
+    # record_id = create_record(archive_token, additional_description=additional_description)
+    # record_id = create_record(archive_token)
+    record_id = 'xfmh0-cck14'
     # retrieve_published_record(archive_token, record_id)
     # retrieve_published_records(archive_token, all_versions=False)
-    # record_id = update_published_record(archive_token, record_id, current_date_time)
+    record_id = update_published_record(archive_token,
+                                        record_id,
+                                        force=True,
+                                        metadata_file_path='data/input/metadata.yaml',
+                                        upload_dir_path='data/input/upload',
+                                        additional_description='')
     # record_id = back_up_finales_db(finales_username, finales_password, archive_token)
     print(record_id)
