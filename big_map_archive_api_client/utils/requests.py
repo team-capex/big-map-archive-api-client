@@ -2,11 +2,11 @@ import json
 import os
 import hashlib
 from zipfile import (ZipFile, ZIP_DEFLATED)
-from datetime import datetime
+import datetime
 import yaml
 
 
-def generate_full_metadata(metadata_file_path, additional_description):
+def generate_full_metadata(base_dir_path, metadata_file_path, additional_description):
     """
     Generates a record's full metadata from a YAML file containing only partial metadata
     """
@@ -30,6 +30,8 @@ def generate_full_metadata(metadata_file_path, additional_description):
             'publisher': 'BIG-MAP Archive'
         }
     }
+
+    metadata_file_path = os.path.join(base_dir_path, metadata_file_path)
 
     with open(metadata_file_path, 'r') as f:
         partial_metadata = yaml.safe_load(f)
@@ -76,6 +78,7 @@ def insert_creators(full_metadata, partial_metadata):
     """
     Inserts creators (i.e., authors) that were extracted from a 'partial' metadata into a 'full' metadata
     """
+    full_metadata['metadata']['creators'] = []
     authors = partial_metadata['authors']
 
     for author in authors:
@@ -165,6 +168,7 @@ def insert_related_identifiers(full_metadata, partial_metadata):
       - 'isbn'
       - 'url'
     """
+    full_metadata['metadata']['related_identifiers'] = []
     references = partial_metadata['references']
 
     for reference in references:
@@ -196,31 +200,30 @@ def export_to_json_file(base_dir_path, output_file_path, data):
         json.dump(data, f, indent=4, sort_keys=True)
 
 
-def change_metadata(full_record_metadata, base_dir_path, metadata_file_path):
+def change_metadata(record_metadata, base_dir_path, metadata_file_path, additional_description):
     """
-    Updates the value of the 'metadata' key in a full record's metadata using a file's content
-    Re-inserts the publication date if the record is published
+    Updates a record's metadata from a YAML file containing only partial metadata
     """
-    file_path = os.path.join(base_dir_path, metadata_file_path)
-    with open(file_path, 'r') as f:
-        partial_metadata = json.load(f)
+    metadata_file_path = os.path.join(base_dir_path, metadata_file_path)
 
-    # Insert date and time in the description
-    now = datetime.now()
-    partial_metadata['description'] += f' The metadata of this entry was updated on {now.strftime("%B %-d, %Y")} at {now.strftime("%H:%M")}.'
+    with open(metadata_file_path, 'r') as f:
+        partial_metadata = yaml.safe_load(f)
 
-    # Insert keywords extracted from results (e.g., values for 'quantity' and 'method') if not already in 'keywords'
-    # keywords = extract_keywords(partial_metadata)
-    # keyword_candidates
+    record_metadata = insert_resource_type(record_metadata, partial_metadata)
+    record_metadata['metadata']['title'] = partial_metadata['title']
+    record_metadata = insert_creators(record_metadata, partial_metadata)
+    record_metadata['metadata']['description'] = partial_metadata['description'] + additional_description
+    record_metadata = insert_rights(record_metadata, partial_metadata)
+    record_metadata = insert_subjects(record_metadata, partial_metadata)
+    record_metadata = insert_related_identifiers(record_metadata, partial_metadata)
 
-    if full_record_metadata['is_published']:
-        publication_date = full_record_metadata['metadata']['publication_date']
-        full_record_metadata['metadata'] = partial_metadata
-        full_record_metadata['metadata']['publication_date'] = publication_date
-    else:
-        full_record_metadata['metadata'] = partial_metadata
+    # Update value of 'updated'
+    now = datetime.datetime.now(datetime.timezone.utc)
+    now_as_string = now.strftime("%Y-%m-%dT%H:%M:%S.%f%z")
+    now_as_string = "{0}:{1}".format(now_as_string[:-2], now_as_string[-2:])
+    record_metadata['updated'] = now_as_string
 
-    return full_record_metadata
+    return record_metadata
 
 
 def get_name_to_checksum_for_files_in_upload_dir(base_dir_path, upload_dir_path):
