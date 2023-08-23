@@ -107,49 +107,40 @@ def insert_rights(full_metadata, partial_metadata):
     :param partial_metadata:
     :return:
     """
+    full_metadata['metadata']['rights'] = [{
+        'description': {
+            'en': ''
+        },
+        'icon': '',
+        'id': '',
+        'props': {
+            'scheme': '',
+            'url': ''
+        },
+        'title': {
+            'en': ''
+        }
+    }]
+
     if partial_metadata['license'] == 'BIG-MAP Archive License':
-        full_metadata['metadata']['rights'] = {
-            'description': {
-                'en': 'The BIG-MAP Archive License allows re-distribution and re-use of work within the BIG-MAP community.'
-            },
-            'id': 'bm-1.0',
-            'props': {
-                'scheme': 'spdx',
-                'url': 'https://www.big-map.eu/'
-            },
-            'title': {
-                'en': 'BIG-MAP Archive License'
-            }
-        }
+        full_metadata['metadata']['rights'][0]['description']['en'] = 'The BIG-MAP Archive License allows re-distribution and re-use of work within the BIG-MAP community.'
+        full_metadata['metadata']['rights'][0]['id'] = 'bm-1.0'
+        full_metadata['metadata']['rights'][0]['props']['scheme'] = 'spdx'
+        full_metadata['metadata']['rights'][0]['props']['url'] = 'https://www.big-map.eu/'
+        full_metadata['metadata']['rights'][0]['title']['en'] = 'BIG-MAP Archive License'
     elif partial_metadata['license'] == 'Creative Commons Attribution Share Alike 4.0 International':
-        full_metadata['metadata']['rights'] = {
-            'description': {
-                'en': "Permits almost any use subject to providing credit and license notice. Frequently used for media assets and educational materials. The most common license for Open Access scientific publications. Not recommended for software."
-            },
-            'icon': 'cc-by-sa-icon',
-            'id': 'cc-by-sa-4.0',
-            'props': {
-                'scheme': 'spdx',
-                'url': 'https://creativecommons.org/licenses/by-sa/4.0/legalcode'
-            },
-            'title': {
-                'en': 'Creative Commons Attribution Share Alike 4.0 International'
-            }
-        }
+        full_metadata['metadata']['rights'][0]['description']['en'] = 'Permits almost any use subject to providing credit and license notice. Frequently used for media assets and educational materials. The most common license for Open Access scientific publications. Not recommended for software.'
+        full_metadata['metadata']['rights'][0]['icon'] = 'cc-by-sa-icon'
+        full_metadata['metadata']['rights'][0]['id'] = 'cc-by-sa-4.0'
+        full_metadata['metadata']['rights'][0]['props']['scheme'] = 'spdx'
+        full_metadata['metadata']['rights'][0]['props']['url'] = 'https://creativecommons.org/licenses/by-sa/4.0/legalcode'
+        full_metadata['metadata']['rights'][0]['title']['en'] = 'Creative Commons Attribution Share Alike 4.0 International'
     elif partial_metadata['license'] == 'MIT License':
-        full_metadata['metadata']['rights'] = {
-            'description': {
-                'en': 'A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.'
-            },
-            'id': 'mit',
-            'props': {
-                'scheme': 'spdx',
-                'url': 'https://opensource.org/licenses/MIT'
-            },
-            'title': {
-                'en': 'MIT License'
-            }
-        }
+        full_metadata['metadata']['rights'][0]['description']['en'] = 'A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.'
+        full_metadata['metadata']['rights'][0]['id'] = 'mit'
+        full_metadata['metadata']['rights'][0]['props']['scheme'] = 'spdx'
+        full_metadata['metadata']['rights'][0]['props']['url'] = 'https://opensource.org/licenses/MIT'
+        full_metadata['metadata']['rights'][0]['title']['en'] = 'MIT License'
     else:
         raise Exception(f'Invalid license {partial_metadata["license"]} in the input metadata file')
 
