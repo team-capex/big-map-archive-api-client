@@ -276,15 +276,15 @@ class ArchiveAPIClient:
 
         return filenames
 
-    def get_links_to_delete(self, record_id, base_dir_path, upload_dir_path, force):
+    def get_links_to_delete(self, record_id, base_dir_path, upload_dir_path, discard):
         """
         Reasons for deleting a file link in a draft:
-        - the linked file is not in the input folder and "discard: true" in config.yaml
-        - a file with the same name as the linked file appears in the input folder but its content is different (md5 hash)
+          - the linked file is not in the input folder and 'discard' is set to 'True'
+          - a file with the same name as the linked file appears in the input folder but its content is different (i.e., different md5 hashes)
         """
         filenames = self.get_changed_content_files(record_id, base_dir_path, upload_dir_path)
 
-        if force:
+        if discard:
             filenames += self.get_missing_files(record_id, base_dir_path, upload_dir_path)
 
         # Remove duplicates
