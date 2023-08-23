@@ -162,7 +162,17 @@ def back_up_finales_db(finales_username,
                        capabilities_file_path='data/output/capabilities.json',
                        results_file_path='data/output/results.json'):
     """
-    Saves capabilities and results for requests stored in a FINALES database to a BIG-MAP Archive
+    Performs a partial back-up of a FINALES database:
+      - all capabilities
+      - all results for requests.
+
+    Comments about entries, titles, service accounts per "campaign":
+      - There should be a single entry in the archive per campaign
+      - An entry may have multiple versions, with one version created each time a back-up of the FINALES database occurs
+      - A title should be given to each version of an entry but should remain unchanged across all versions of the same entry
+      - A title should vary from one entry to another and should be unique to a campaign
+      - A single service account (e.g., jane.doe+FINALES_1@xxx.xx) should be used for doing back-ups of a campaign; it becomes the owner of the entry and the linked data files
+      - A single service account can be used for multiple campaigns.
 
     :param finales_username: username for an account on the FINALES server
     :param finales_password: password for the account
