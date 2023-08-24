@@ -99,9 +99,9 @@ def update_published_record(token,
                             upload_dir_path='data/input/upload',
                             additional_description='',
                             discard=True,
-                            publish=True):
+                            publish=False):
     """
-    Updates an entry by either modifying its latest version, which should be published, or creating a new version and publishing it.
+    Updates an entry by either modifying its latest version, which should be published, or creating a new version and optionally publishing it.
     Raises an exception if the latest version does not exist or is not published
 
     :param token: personal access token for the archive
@@ -140,16 +140,16 @@ def update_published_record(token,
         # 2. Update the draft's metadata
         client.update_metadata(record_id, base_dir_path, metadata_file_path, additional_description)
 
-        # 3. Import all file links from the previous version
+        # 3. Import all file links from the previous version after cleaning
         filenames = client.get_links(record_id)
         client.delete_links(record_id, filenames)
         client.post_file_import(record_id)
 
-        # 4. Get file links to remove and remove them
+        # 4. Get a list of all file links to be removed and remove them
         filenames = client.get_links_to_delete(record_id, base_dir_path, upload_dir_path, discard)
         client.delete_links(record_id, filenames)
 
-        # 5. Get list of files to upload and upload them
+        # 5. Get a list of files to upload and upload them
         filenames = client.get_files_to_upload(record_id, base_dir_path, upload_dir_path)
         client.upload_files(record_id, base_dir_path, upload_dir_path, filenames)
 
@@ -276,6 +276,8 @@ if __name__ == '__main__':
                                         force=True,
                                         metadata_file_path='data/input/metadata.yaml',
                                         upload_dir_path='data/input/upload',
-                                        additional_description='')
+                                        additional_description=additional_description,
+                                        discard=True,
+                                        publish=True)
     # record_id = back_up_finales_db(finales_username, finales_password, archive_token)
     print(record_id)
