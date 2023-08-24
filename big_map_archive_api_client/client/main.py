@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import shutil
 from dotenv import load_dotenv
 from datetime import datetime
 from big_map_archive_api_client.client.client_config import ClientConfig
@@ -45,43 +46,66 @@ def create_record(token,
     return record_id
 
 
-def retrieve_published_record(token,
-                              record_id,
-                              export=True,
-                              output_file_path='data/output/metadata.json'):
+def get_metadata_of_published_record(token,
+                                     record_id,
+                                     export=True,
+                                     metadata_file_path='data/output/metadata.json'):
     """
-    Retrieves the metadata of a published record on a BIG-MAP Archive and, optionally, saves it to a file.
+    Retrieves the metadata of a published record on a BIG-MAP Archive and optionally saves it to a file.
 
     :param token: personal access token for the archive
-    :param record_id: id of the published record to retrieve
+    :param record_id: id of the targeted published record
     :param export: whether the obtained metadata of the record should be saved to a file
-    :param output_file_path: relative path to the output file
+    :param metadata_file_path: relative path to the obtained record's metadata
+    :return: the obtained record's metadata
     """
+    # Create/re-create the output folder
     base_dir_path = Path(__file__).absolute().parent.parent.parent
+    output_dir_path = os.path.dirname(os.path.join(base_dir_path, metadata_file_path))
+
+    if os.path.exists(output_dir_path):
+        shutil.rmtree(output_dir_path)
+
+    os.makedirs(output_dir_path)
+
+    # Create an ArchiveAPIClient object to intereact with the archive
     config_file_path = os.path.join(base_dir_path, 'archive_config.yaml')
     client_config = ClientConfig.load_from_config_file(config_file_path)
     client = client_config.create_client(token)
+
     response = client.get_record(record_id)
 
     if export:
-        export_to_json_file(base_dir_path, output_file_path, response)
+        export_to_json_file(base_dir_path, metadata_file_path, response)
+
+    return response
 
 
-def retrieve_published_records(token,
-                               export=True,
-                               output_file_path='data/output/metadata.json',
-                               all_versions=False,
-                               response_size='1e6'):
+def get_metadata_of_published_records(token,
+                                      export=True,
+                                      metadata_file_path='data/output/metadata.json',
+                                      all_versions=False,
+                                      response_size='1e6'):
     """
     Retrieves the metadata of all published records on a BIG-MAP Archive and, optionally, saves it to a file.
 
     :param token: personal access token for the archive
     :param export: whether the obtained metadata of the records should be saved to a file
-    :param output_file_path: relative path to the output file
-    :param all_versions: whether all record versions or only the latest record versions should be harvested
+    :param metadata_file_path: relative path to the obtained records' metadata
+    :param all_versions: whether all published versions of each entry should be considered or only the latest published version
     :param response_size: maximum number of items in a response body
+    :return: the obtained records' metadata
     """
+    # Create/re-create the output folder
     base_dir_path = Path(__file__).absolute().parent.parent.parent
+    output_dir_path = os.path.dirname(os.path.join(base_dir_path, metadata_file_path))
+
+    if os.path.exists(output_dir_path):
+        shutil.rmtree(output_dir_path)
+
+    os.makedirs(output_dir_path)
+
+    # Create an ArchiveAPIClient object to intereact with the archive
     config_file_path = os.path.join(base_dir_path, 'archive_config.yaml')
     client_config = ClientConfig.load_from_config_file(config_file_path)
     client = client_config.create_client(token)
@@ -89,7 +113,9 @@ def retrieve_published_records(token,
     response = client.get_records(all_versions, response_size)
 
     if export:
-        export_to_json_file(base_dir_path, output_file_path, response)
+        export_to_json_file(base_dir_path, metadata_file_path, response)
+
+    return response
 
 
 def update_published_record(token,
@@ -164,28 +190,39 @@ def update_published_record(token,
 def back_up_finales_db(finales_username,
                        finales_password,
                        archive_token,
-                       capabilities_file_path='data/output/capabilities.json',
-                       results_file_path='data/output/results.json'):
+                       record_id=None,
+                       capabilities_filename='capabilities.json',
+                       requests_filename='requests.json',
+                       results_for_requests_filename='results_for_requests.json',
+                       tenants_filename='tenants.json'):
     """
     Performs a partial back-up of a FINALES database:
       - all capabilities
-      - all results for requests.
-
-    Comments about entries, titles, service accounts per "campaign":
-      - There should be a single entry in the archive per campaign
-      - An entry may have multiple versions, with one version created each time a back-up of the FINALES database occurs
-      - A title should be given to each version of an entry but should remain unchanged across all versions of the same entry
-      - A title should vary from one entry to another and should be unique to a campaign
-      - A single service account (e.g., jane.doe+FINALES_1@xxx.xx) should be used for doing back-ups of a campaign; it becomes the owner of the entry and the linked data files
-      - A single service account can be used for multiple campaigns.
+      - all requests
+      - all results for requests
+      - all tenants.
 
     :param finales_username: username for an account on the FINALES server
     :param finales_password: password for the account
     :param archive_token: personal access token for the FINALES account on the selected BIG-MAP Archive
-    :param capabilities_file_path: relative path to the local file for all capabilities obtained from the FINALES server
-    :param results_file_path: to the local file for all results for requests obtained from the FINALES server
+    :param capabilities_filename: name of the file where capabilities obtained from the FINALES database are stored
+    :param requests_filename: name of the file where requests obtained from the FINALES database are stored
+    :param results_for_requests_filename: name of the file where results for requests obtained from the FINALES database are stored
+    :param tenants_filename: name of the file where tenants obtained from the FINALES database are stored
+    :param record_id: id of the latest version of the entry - if a valid record_id is not provided by the user, a new entry is created in the archive
+    :return: the id of the version
     """
+    # Create/re-create folder where files are stored temporarily
     base_dir_path = Path(__file__).absolute().parent.parent.parent
+    temp_dir_path = 'data/temp'
+    temp_dir_path = os.path.join(base_dir_path, temp_dir_path)
+
+    if os.path.exists(temp_dir_path):
+        shutil.rmtree(temp_dir_path)
+
+    os.makedirs(temp_dir_path)
+
+    # Create a FinalesAPIClient object to interact with FINALES server
     config_file_path = os.path.join(base_dir_path, 'finales_config.yaml')
     client_config = FinalesClientConfig.load_from_config_file(config_file_path)
     client = client_config.create_client(finales_username, finales_password)
@@ -196,17 +233,17 @@ def back_up_finales_db(finales_username,
 
     # Get all capabilities stored in the FINALES database
     response = client.get_capabilities(finales_token)
+    output_file_path = os.path.join(temp_dir_path, capabilities_filename)
+    export_to_json_file(base_dir_path, output_file_path, response)
 
-    # If at least one capability is found, generate a JSON file that contains each found capability
-    if len(response) > 0:
-        export_to_json_file(base_dir_path, capabilities_file_path, response)
+    # Get all requests stored in the FINALES database
+    response = client.get_requests(finales_token)
+    requests_file_path = 'data/output/requests.json'
+    export_to_json_file(base_dir_path, requests_file_path, response)
 
     # Get all results associated with requests stored in the FINALES database
     response = client.get_results_requested(finales_token)
-
-    # If at least one result is found, generate a JSON file that contains each found result
-    if len(response) > 0:
-        export_to_json_file(base_dir_path, results_file_path, response)
+    export_to_json_file(base_dir_path, results_file_path, response)
 
     # Get the ids of the latest version on the archive for FINALES
     config_file_path = os.path.join(base_dir_path, 'archive_config.yaml')
@@ -268,16 +305,20 @@ if __name__ == '__main__':
     additional_description = f' This operation was performed on {now.strftime("%B %-d, %Y")} at {now.strftime("%H:%M")}.'
     # record_id = create_record(archive_token, additional_description=additional_description)
     # record_id = create_record(archive_token)
-    record_id = 'xfmh0-cck14'
-    # retrieve_published_record(archive_token, record_id)
-    # retrieve_published_records(archive_token, all_versions=False)
-    record_id = update_published_record(archive_token,
-                                        record_id,
-                                        force=True,
-                                        metadata_file_path='data/input/metadata.yaml',
-                                        upload_dir_path='data/input/upload',
-                                        additional_description=additional_description,
-                                        discard=True,
-                                        publish=True)
-    # record_id = back_up_finales_db(finales_username, finales_password, archive_token)
-    print(record_id)
+    #record_id = 'xfmh0-cck14'
+    #response = get_metadata_of_published_record(archive_token, record_id)
+    #print(response)
+    response = get_metadata_of_published_records(archive_token, all_versions=False)
+    print(response)
+    # record_id = update_published_record(archive_token,
+    #                                     record_id,
+    #                                     force=True,
+    #                                     metadata_file_path='data/input/metadata.yaml',
+    #                                     upload_dir_path='data/input/upload',
+    #                                     additional_description=additional_description,
+    #                                     discard=True,
+    #                                     publish=True)
+    # record_id = back_up_finales_db(finales_username,
+    #                                finales_password,
+    #                                archive_token)
+    # print(record_id)
