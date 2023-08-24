@@ -2,7 +2,17 @@
 
 ## Overview
 
-This repository provides methods to interact with the BIG-MAP Archive's API. 
+This repository provides methods to interact with the BIG-MAP Archive's API.
+
+## FINALES server's database back-ups
+
+Comments about entries, titles, service accounts per "campaign":
+    - There should be a single entry in the archive per campaign;
+    - An entry may have multiple versions, with one version created each time a back-up of the FINALES database occurs;
+    - A title should be given to each version of an entry but should remain unchanged across all versions of the same entry;
+    - A title should vary from one entry to another and should be unique to a campaign;
+    - A single service account (e.g., jane.doe+FINALES_1@xxx.xx) should be used for doing back-ups of a campaign; it becomes the owner of the entry and the linked data files;
+    - A single service account can be used for multiple campaigns.
 
 ## Support
 
