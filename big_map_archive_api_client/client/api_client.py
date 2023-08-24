@@ -312,6 +312,14 @@ class ArchiveAPIClient:
         response.raise_for_status()
         return response.json()
 
+
+    def exists_and_is_published(self, record_id):
+        """
+        Raises an exception if a version of an entry does not exist or is not published
+        """
+        self.get_record(record_id)
+
+
     def get_latest_versions(self):
         """
         Gets the ids and the statuses of the latest version of all entries belonging to a user
@@ -323,11 +331,18 @@ class ArchiveAPIClient:
         latest_versions = [{'id': v['id'], 'is_published': v['is_published']} for v in latest_versions]
         return latest_versions
 
-    def exists_and_is_published(self, record_id):
+
+    def get_published_user_records_with_given_title(self, title):
         """
-        Raises an exception if a version of an entry does not exist or is not published
+        Gets the ids of the records owned by the user that are published and have a given title
         """
-        self.get_record(record_id)
+        all_versions = True
+        response_size = int(float('1e6'))
+        response = self.get_user_records(all_versions, response_size)
+        user_records = response['hits']['hits']
+        record_ids = [r['id'] for r in user_records if (r['is_published'] and r['metadata']['title'] == title)]
+
+        return record_ids
 
 
 

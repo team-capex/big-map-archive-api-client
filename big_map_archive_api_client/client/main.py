@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 from datetime import datetime
 from big_map_archive_api_client.client.client_config import ClientConfig
 from big_map_archive_api_client.utils import (get_data_files_in_upload_dir,
-                                              export_to_json_file)
+                                              export_to_json_file,
+                                              get_title_from_metadata_file)
 
 from finales_api_client.client.client_config import FinalesClientConfig
 
@@ -190,32 +191,33 @@ def update_published_record(token,
 def back_up_finales_db(finales_username,
                        finales_password,
                        archive_token,
+                       metadata_file_path='data/input/metadata.yaml',
                        record_id=None,
                        capabilities_filename='capabilities.json',
                        requests_filename='requests.json',
-                       results_for_requests_filename='results_for_requests.json',
-                       tenants_filename='tenants.json'):
+                       results_filename='results_for_requests.json',
+                       publish=True):
     """
-    Performs a partial back-up of a FINALES database:
+    Performs a partial back-up of a FINALES database by creating a new version in a BIG-MAP Archive and optionally publishing it. Backed-up data includes:
       - all capabilities
       - all requests
-      - all results for requests
-      - all tenants.
+      - all results for requests.
 
     :param finales_username: username for an account on the FINALES server
     :param finales_password: password for the account
     :param archive_token: personal access token for the FINALES account on the selected BIG-MAP Archive
+    :param metadata_file_path: relative path to the metadata file used for creating/updating an entry (title, list of authors...)
+    :param record_id: id of the latest published version of an entry to update - by default, a new entry is created
     :param capabilities_filename: name of the file where capabilities obtained from the FINALES database are stored
     :param requests_filename: name of the file where requests obtained from the FINALES database are stored
-    :param results_for_requests_filename: name of the file where results for requests obtained from the FINALES database are stored
-    :param tenants_filename: name of the file where tenants obtained from the FINALES database are stored
-    :param record_id: id of the latest version of the entry - if a valid record_id is not provided by the user, a new entry is created in the archive
+    :param results_filename: name of the file where results for requests obtained from the FINALES database are stored
+    :param publish: whether the new version should be published or not
     :return: the id of the version
     """
     # Create/re-create folder where files are stored temporarily
     base_dir_path = Path(__file__).absolute().parent.parent.parent
-    temp_dir_path = 'data/temp'
-    temp_dir_path = os.path.join(base_dir_path, temp_dir_path)
+    temp_dir_rel_path = 'data/temp'
+    temp_dir_path = os.path.join(base_dir_path, temp_dir_rel_path)
 
     if os.path.exists(temp_dir_path):
         shutil.rmtree(temp_dir_path)
@@ -231,65 +233,97 @@ def back_up_finales_db(finales_username,
     response = client.post_authenticate()
     finales_token = response['access_token']
 
-    # Get all capabilities stored in the FINALES database
+    # Get data from the FINALES database
+    # 1. Capabilities
     response = client.get_capabilities(finales_token)
-    output_file_path = os.path.join(temp_dir_path, capabilities_filename)
-    export_to_json_file(base_dir_path, output_file_path, response)
+    capabilities_file_path = os.path.join(temp_dir_rel_path, capabilities_filename)
+    export_to_json_file(base_dir_path, capabilities_file_path, response)
 
-    # Get all requests stored in the FINALES database
-    response = client.get_requests(finales_token)
-    requests_file_path = 'data/output/requests.json'
+    # 2. Requests
+    response = client.get_all_requests(finales_token)
+    requests_file_path = os.path.join(temp_dir_rel_path, requests_filename)
     export_to_json_file(base_dir_path, requests_file_path, response)
 
-    # Get all results associated with requests stored in the FINALES database
+    # 3. Results for requests
     response = client.get_results_requested(finales_token)
+    results_file_path = os.path.join(temp_dir_rel_path, results_filename)
     export_to_json_file(base_dir_path, results_file_path, response)
 
-    # Get the ids of the latest version on the archive for FINALES
+    # Create an ArchiveAPIClient object to interact with the archive
     config_file_path = os.path.join(base_dir_path, 'archive_config.yaml')
     client_config = ClientConfig.load_from_config_file(config_file_path)
     client = client_config.create_client(archive_token)
-    latest_versions = client.get_latest_versions()
-    number_of_latest_versions = len(latest_versions)
 
     now = datetime.now()
-    additional_description = f' This operation was performed on {now.strftime("%B %-d, %Y")} at {now.strftime("%H:%M")}.'
+    additional_description = f' The back-up was performed on {now.strftime("%B %-d, %Y")} at {now.strftime("%H:%M")}.'
 
-    # Only zero or one id is allowed
-    if number_of_latest_versions == 0:
-        # Create a first record version
-        record_id = create_record(archive_token,
-                                  metadata_file_path='data/input/finales_metadata.json',
-                                  upload_dir_path='data/output',
-                                  additional_description=additional_description,
-                                  publish=True)
-        return record_id
+    # If record_id is not provided (None is a falsy value)
+    if (not record_id):
+        # Count the number of published records owned by the user that have the same title as that in the provided metadata file
+        title = get_title_from_metadata_file(base_dir_path, metadata_file_path)
+        record_ids = client.get_published_user_records_with_given_title(title)
+        nb_records = len(record_ids)
 
-    if number_of_latest_versions == 1:
-        id = latest_versions[0]['id']
-        is_published = latest_versions[0]['is_published']
-
-        if is_published:
-            # Update the current record version
-            record_id = update_published_record(archive_token,
-                                                id,
-                                                force=True,
-                                                metadata_file_path='data/input/finales_metadata.json',
-                                                upload_dir_path='data/output',
-                                                discard=False,
-                                                publish=True)
+        # If the user does not own any such record, create a new entry in the archive
+        if nb_records == 0:
+            record_id = create_record(archive_token,
+                                      metadata_file_path=metadata_file_path,
+                                      upload_dir_path=temp_dir_rel_path,
+                                      additional_description=additional_description,
+                                      publish=publish)
             return record_id
 
-        # The latest version is in status 'draft'
-        client.delete_draft(id)
-        record_id = back_up_finales_db(finales_username,
-                                       finales_password,
-                                       archive_token,
-                                       capabilities_file_path,
-                                       results_file_path)
-        return record_id
+        # User may have forgotten to set record_id to already existing entry version
+        raise Exception(f'Records with the specified title already exist: {record_ids}. '
+                        f'Do you confirm that you prefer creating a new entry than updating an existing entry? '
+                        f'If not, set record_id accordingly.')
 
-    raise Exception('Multiple latest versions')
+
+
+
+
+    # # Get the ids of the latest version on the archive for FINALES
+    # latest_versions = client.get_latest_versions()
+    # number_of_latest_versions = len(latest_versions)
+    #
+    # now = datetime.now()
+    # additional_description = f' This operation was performed on {now.strftime("%B %-d, %Y")} at {now.strftime("%H:%M")}.'
+    #
+    # # Only zero or one id is allowed
+    # if number_of_latest_versions == 0:
+    #     # Create a first record version
+    #     record_id = create_record(archive_token,
+    #                               metadata_file_path='data/input/finales_metadata.json',
+    #                               upload_dir_path='data/output',
+    #                               additional_description=additional_description,
+    #                               publish=True)
+    #     return record_id
+    #
+    # if number_of_latest_versions == 1:
+    #     id = latest_versions[0]['id']
+    #     is_published = latest_versions[0]['is_published']
+    #
+    #     if is_published:
+    #         # Update the current record version
+    #         record_id = update_published_record(archive_token,
+    #                                             id,
+    #                                             force=True,
+    #                                             metadata_file_path='data/input/finales_metadata.json',
+    #                                             upload_dir_path='data/output',
+    #                                             discard=False,
+    #                                             publish=True)
+    #         return record_id
+    #
+    #     # The latest version is in status 'draft'
+    #     client.delete_draft(id)
+    #     record_id = back_up_finales_db(finales_username,
+    #                                    finales_password,
+    #                                    archive_token,
+    #                                    capabilities_file_path,
+    #                                    results_file_path)
+    #     return record_id
+    #
+    # raise Exception('Multiple latest versions')
 
 
 if __name__ == '__main__':
@@ -308,8 +342,8 @@ if __name__ == '__main__':
     #record_id = 'xfmh0-cck14'
     #response = get_metadata_of_published_record(archive_token, record_id)
     #print(response)
-    response = get_metadata_of_published_records(archive_token, all_versions=False)
-    print(response)
+    #response = get_metadata_of_published_records(archive_token, all_versions=False)
+    #print(response)
     # record_id = update_published_record(archive_token,
     #                                     record_id,
     #                                     force=True,
@@ -318,7 +352,7 @@ if __name__ == '__main__':
     #                                     additional_description=additional_description,
     #                                     discard=True,
     #                                     publish=True)
-    # record_id = back_up_finales_db(finales_username,
-    #                                finales_password,
-    #                                archive_token)
-    # print(record_id)
+    record_id = back_up_finales_db(finales_username,
+                                    finales_password,
+                                    archive_token)
+    print(record_id)
