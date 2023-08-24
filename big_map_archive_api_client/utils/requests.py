@@ -1,7 +1,6 @@
 import json
 import os
 import hashlib
-from zipfile import (ZipFile, ZIP_DEFLATED)
 import datetime
 import yaml
 
@@ -265,53 +264,15 @@ def get_data_files_in_upload_dir(base_dir_path, upload_dir_path):
     return filenames
 
 
-def export_capabilities_to_zip_file(base_dir_path, output_dir, filename, capabilities):
+def get_title_from_metadata_file(base_dir_path, metadata_file_path):
     """
-    Puts each capability in the list in its own JSON file
-    Creates a ZIP file that contains all of these JSON files in the output folder
+    Extracts the title from a YAML metadata file
     """
-    output_file_path = os.path.join(base_dir_path, output_dir, filename)
-    filenames = []
+    metadata_file_path = os.path.join(base_dir_path, metadata_file_path)
 
-    for c in capabilities:
-        quantity = c['quantity']
-        quantity = quantity.strip().replace(" ",
-                                            "_")  # Remove leading and trailing spaces and replace remaining spaces by _
-        method = c['method']
-        method = method.strip()  # remove leading and trailing spaces
-        method = method.strip().replace(" ", "_")
-        file = f'{quantity}_{method}.json'
-        export_to_json_file(base_dir_path, output_dir, file, c)
-        filenames.append(file)
+    with open(metadata_file_path, 'r') as f:
+        partial_metadata = yaml.safe_load(f)
 
-    with ZipFile(output_file_path, 'w') as zf:
-        for file in filenames:
-            file_path = os.path.join(base_dir_path, output_dir, file)
-            zf.write(file_path, file, compress_type=ZIP_DEFLATED)
-            os.remove(file_path)
+    title = partial_metadata['title']
 
-
-def export_results_to_zip_file(base_dir, output_dir, filename, results):
-    """
-    Puts each result in the list in its own JSON file
-    Creates a ZIP file that contains all of these JSON files in the output folder
-    """
-    output_file_path = os.path.join(base_dir, output_dir, filename)
-    filenames = []
-
-    for r in results:
-        quantity = c['quantity']
-        quantity = quantity.strip().replace(" ",
-                                            "_")  # Remove leading and trailing spaces and replace remaining spaces by _
-        method = c['method']
-        method = method.strip()  # remove leading and trailing spaces
-        method = method.strip().replace(" ", "_")
-        file = f'{quantity}_{method}.json'
-        export_to_json_file(base_dir, output_dir, file, c)
-        filenames.append(file)
-
-    with ZipFile(output_file_path, 'w') as zf:
-        for file in filenames:
-            file_path = os.path.join(base_dir, output_dir, file)
-            zf.write(file_path, file, compress_type=ZIP_DEFLATED)
-            os.remove(file_path)
+    return title

@@ -43,6 +43,16 @@ class FinalesAPIClient:
         response.raise_for_status()
         return response.json()
 
+    def get_all_requests(self, token):
+        """
+        Gets all requests stored in the FINALES database
+        Raises an HTTPError exception if the request fails
+        """
+        resource_path = '/all_requests'
+        response = self._connection.get(resource_path, token)
+        response.raise_for_status()
+        return response.json()
+
     def get_results_requested(self, token):
         """
         Gets all results associated with requests stored in the FINALES database
