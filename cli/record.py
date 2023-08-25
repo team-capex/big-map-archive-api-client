@@ -7,7 +7,9 @@ import requests
 
 from cli.root import cmd_root
 from big_map_archive_api_client.client.client_config import ClientConfig
-from big_map_archive_api_client.utils import (get_data_files_in_upload_dir)
+from big_map_archive_api_client.utils import (get_data_files_in_upload_dir,
+                                              export_to_json_file,
+                                              create_directory)
 
 
 @cmd_root.group('record')
@@ -46,7 +48,7 @@ def cmd_record():
 )
 def cmd_record_create(config_file, metadata_file, data_files, publish):
     """
-    Create a record on a BIG-MAP Archive and optionally publish it
+    Create a record on a BIG-MAP Archive and optionally publish it.
     """
     try:
         base_dir_path = Path(__file__).absolute().parent.parent
@@ -81,4 +83,49 @@ def cmd_record_create(config_file, metadata_file, data_files, publish):
         click.echo(f'An error occurred. More info: {str(e)}.')
 
 
+@cmd_record.command('get-metadata')
+@click.option(
+    '--config-file',
+    show_default=True,
+    default='bma_config.yaml',
+    help='Relative path to the file specifying the domain name and a personal access token for the targeted BIG-MAP Archive.',
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+)
+@click.option(
+    '--record-id',
+    required=True,
+    help='Id of the published record (e.g., "pxrf9-zfh45").',
+    type=str
+)
+@click.option(
+    '--output-file',
+    show_default=True,
+    default='data/output/metadata.json',
+    help='Relative path to the file where the obtained record\'s metadata will be exported to.',
+    type=click.Path(exists=False, file_okay=True, dir_okay=False),
+)
+def cmd_record_get_metadata(config_file, record_id, output_file):
+    """
+    Get the metadata of a published record on a BIG-MAP Archive and save it to a file.
+    """
+    try:
+        base_dir_path = Path(__file__).absolute().parent.parent
+        output_dir_path = os.path.dirname(output_file)
+        create_directory(base_dir_path, output_dir_path)
 
+        # Create an ArchiveAPIClient object to interact with the archive
+        config_file_path = os.path.join(base_dir_path, config_file)
+        client_config = ClientConfig.load_from_config_file(config_file_path)
+        client = client_config.create_client()
+
+        response = client.get_record(record_id)
+
+        export_to_json_file(base_dir_path, output_file, response)
+
+        click.echo(f'Record\'s metadata obtained and saved to {output_file}.')
+    except requests.exceptions.ConnectionError as e:
+        click.echo(f'An error of type ConnectionError occurred. Check the domain name in {config_file}. More info: {str(e)}.')
+    except requests.exceptions.HTTPError as e:
+        click.echo(f'An error of type HTTPError occurred. Check your token in {config_file}. More info: {str(e)}.')
+    except Exception as e:
+        click.echo(f'An error occurred. More info: {str(e)}.')
