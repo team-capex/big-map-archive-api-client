@@ -1,4 +1,4 @@
-"""Commands that act directly on the server."""
+"""Commands to manage one record at a time."""
 import click
 from pathlib import Path
 import os
