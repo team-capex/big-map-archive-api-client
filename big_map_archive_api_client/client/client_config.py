@@ -6,7 +6,7 @@ class ClientConfig(BaseModel):
     """Configuration data for a BMA API's client."""
 
     domain_name: str
-    port: int
+    token: str
 
     @classmethod
     def load_from_config_file(cls, file_path):
@@ -20,9 +20,9 @@ class ClientConfig(BaseModel):
 
         return ClientConfig(**client_config)
 
-    def create_client(self, token):
+    def create_client(self):
         """
         Creates a client to interact with BMA's API
         Initializes internal fields
         """
-        return ArchiveAPIClient(self.domain_name, self.port, token)
+        return ArchiveAPIClient(self.domain_name, self.token)
