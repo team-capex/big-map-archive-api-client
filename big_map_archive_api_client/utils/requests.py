@@ -3,7 +3,7 @@ import os
 import hashlib
 import datetime
 import yaml
-import shutil
+
 
 
 def generate_full_metadata(base_dir_path, metadata_file_path, additional_description):
@@ -193,6 +193,7 @@ def insert_related_identifiers(full_metadata, partial_metadata):
 def export_to_json_file(base_dir_path, output_file_path, data):
     """
     Exports data to a JSON file
+    The file is created if it does not exist or its contents is cleared if it exists
     """
     output_file_path = os.path.join(base_dir_path, output_file_path)
 
@@ -278,13 +279,11 @@ def get_title_from_metadata_file(base_dir_path, metadata_file_path):
 
     return title
 
-def create_or_recreate_directory(base_dir_path, dir_path):
+def create_directory(base_dir_path, dir_path):
     """
-    Creates a folder if it does not exist, otherwise re-creates it
+    Creates a folder if it does not exist
     """
     dir_path = os.path.join(base_dir_path, dir_path)
 
-    if os.path.exists(dir_path):
-        shutil.rmtree(dir_path)
-
-    os.makedirs(dir_path)
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)

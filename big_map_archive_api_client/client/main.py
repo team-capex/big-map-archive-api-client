@@ -6,7 +6,7 @@ from big_map_archive_api_client.client.client_config import ClientConfig
 from big_map_archive_api_client.utils import (get_data_files_in_upload_dir,
                                               export_to_json_file,
                                               get_title_from_metadata_file,
-                                              create_or_recreate_directory)
+                                              create_directory)
 
 from finales_api_client.client.client_config import FinalesClientConfig
 
@@ -62,7 +62,7 @@ def get_metadata_of_published_record(token,
     """
     base_dir_path = Path(__file__).absolute().parent.parent.parent
     output_dir_path = os.path.dirname(metadata_file_path)
-    create_or_recreate_directory(base_dir_path, output_dir_path)
+    create_directory(base_dir_path, output_dir_path)
 
     # Create an ArchiveAPIClient object to interact with the archive
     config_file_path = os.path.join(base_dir_path, 'archive_config.yaml')
@@ -95,7 +95,7 @@ def get_metadata_of_published_records(token,
     # Create/re-create the output folder
     base_dir_path = Path(__file__).absolute().parent.parent.parent
     output_dir_path = os.path.dirname(metadata_file_path)
-    create_or_recreate_directory(base_dir_path, output_dir_path)
+    create_directory(base_dir_path, output_dir_path)
 
     # Create an ArchiveAPIClient object to intereact with the archive
     config_file_path = os.path.join(base_dir_path, 'archive_config.yaml')
@@ -206,7 +206,7 @@ def back_up_finales_db(finales_username,
     # Create/re-create folder where files are stored temporarily
     base_dir_path = Path(__file__).absolute().parent.parent.parent
     temp_dir_path = 'data/temp'
-    create_or_recreate_directory(base_dir_path, temp_dir_path)
+    create_directory(base_dir_path, temp_dir_path)
 
     # Create a FinalesAPIClient object to interact with FINALES server
     config_file_path = os.path.join(base_dir_path, 'finales_config.yaml')
