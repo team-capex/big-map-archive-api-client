@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import date
+import requests
 
 from big_map_archive_api_client.client.rest_api_connection import RestAPIConnection
 from big_map_archive_api_client.utils import (generate_full_metadata,
@@ -317,7 +318,14 @@ class ArchiveAPIClient:
         """
         Raises an exception if a version of an entry does not exist or is not published
         """
-        self.get_record(record_id)
+        try:
+            self.get_record(record_id)
+        except requests.exceptions.HTTPError as err:
+            if err.response.status_code == 404:
+                print(f'Invalid record_id {record_id}: the record should exist and be published')
+
+            raise
+
 
 
     def get_latest_versions(self):

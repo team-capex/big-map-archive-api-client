@@ -1,0 +1,23 @@
+resource_type: "Other" # Options: "Dataset", "Software", "Other"; other types are not supported
+title: "[UPDATED AGAIN] Partial back-up of the FINALES' database"
+authors:
+  - family_name: "Liot"
+    given_name: "Francois"
+    affiliations:
+      - "Theory and Simulation of Materials (THEOS), École Polytechnique Fédérale de Lausanne, CH-1015 Lausanne, Switzerland"
+  - family_name: "Von Big-Map"
+    given_name: "Pat"
+    affiliations:
+      - "Center for Catalysis Theory (Cattheory), Department of Physics, Technical University of Denmark (DTU), 2800 Kongens Lyngby, Denmark"
+      - "École Polytechnique Fédérale de Lausanne, CH-1015 Lausanne, Switzerland"
+description: "Requests, and results for requests were copied from the FINALES' database."
+license: "MIT License" # Options: "BIG-MAP Archive License", "Creative Commons Attribution Share Alike 4.0 International", "MIT License"; other licenses are not supported
+keywords: # Any keyword is accepted
+  - "FINALE"
+  - "automation"
+  - "BIG-MAP"
+references: # Options for reference schemes: "arxiv" (identifier example: "2308.08462"), "doi" (identifier example: "10.1093/ajae/aaq063"), "isbn" (identifier example: "978-3-16-148410-0"), "url" (identifier example: "https://arxiv.org/abs/2308.08462"); other reference schemes are not accepted
+  - scheme: "arxiv"
+    identifier: "2308.08463"
+  - scheme: "isbn"
+    identifier: "978-3-16-148410-0"
