@@ -1,0 +1,2 @@
+domain_name: big-map-archive-demo.materialscloud.org # Other values: archive.big-map.eu, big-map-archive-demo-public.materialscloud.org
+token: <replace_by_valid_token_for_targeted_BIG-MAP_Archive>

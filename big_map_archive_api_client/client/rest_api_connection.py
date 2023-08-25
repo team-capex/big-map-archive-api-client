@@ -3,11 +3,11 @@ import requests
 class RestAPIConnection:
     """Internal auxiliary class that handles the base connection."""
 
-    def __init__(self, domain_name, port):
+    def __init__(self, domain_name):
         """
         Initializes internal fields
         """
-        self._base_url = f'https://{domain_name}:{port}'
+        self._base_url = f'https://{domain_name}:{443}'
 
     def get(self, resource_path, token):
         """

@@ -14,11 +14,11 @@ class ArchiveAPIClient:
     Class to interact with BMA's API
     """
 
-    def __init__(self, domain_name, port, token):
+    def __init__(self, domain_name, token):
         """
         Initialize internal variables
         """
-        self._connection = RestAPIConnection(domain_name, port)
+        self._connection = RestAPIConnection(domain_name)
         self._token = token
 
     def post_records(self, base_dir_path, metadata_file_path, additional_description):
