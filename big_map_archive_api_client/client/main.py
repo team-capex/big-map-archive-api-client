@@ -1,12 +1,12 @@
 from pathlib import Path
 import os
-import shutil
 from dotenv import load_dotenv
 from datetime import datetime
 from big_map_archive_api_client.client.client_config import ClientConfig
 from big_map_archive_api_client.utils import (get_data_files_in_upload_dir,
                                               export_to_json_file,
-                                              get_title_from_metadata_file)
+                                              get_title_from_metadata_file,
+                                              create_or_recreate_directory)
 
 from finales_api_client.client.client_config import FinalesClientConfig
 
@@ -60,16 +60,11 @@ def get_metadata_of_published_record(token,
     :param metadata_file_path: relative path to the obtained record's metadata
     :return: the obtained record's metadata
     """
-    # Create/re-create the output folder
     base_dir_path = Path(__file__).absolute().parent.parent.parent
-    output_dir_path = os.path.dirname(os.path.join(base_dir_path, metadata_file_path))
+    output_dir_path = os.path.dirname(metadata_file_path)
+    create_or_recreate_directory(base_dir_path, output_dir_path)
 
-    if os.path.exists(output_dir_path):
-        shutil.rmtree(output_dir_path)
-
-    os.makedirs(output_dir_path)
-
-    # Create an ArchiveAPIClient object to intereact with the archive
+    # Create an ArchiveAPIClient object to interact with the archive
     config_file_path = os.path.join(base_dir_path, 'archive_config.yaml')
     client_config = ClientConfig.load_from_config_file(config_file_path)
     client = client_config.create_client(token)
@@ -99,12 +94,8 @@ def get_metadata_of_published_records(token,
     """
     # Create/re-create the output folder
     base_dir_path = Path(__file__).absolute().parent.parent.parent
-    output_dir_path = os.path.dirname(os.path.join(base_dir_path, metadata_file_path))
-
-    if os.path.exists(output_dir_path):
-        shutil.rmtree(output_dir_path)
-
-    os.makedirs(output_dir_path)
+    output_dir_path = os.path.dirname(metadata_file_path)
+    create_or_recreate_directory(base_dir_path, output_dir_path)
 
     # Create an ArchiveAPIClient object to intereact with the archive
     config_file_path = os.path.join(base_dir_path, 'archive_config.yaml')
@@ -144,8 +135,6 @@ def update_published_record(token,
     config_file_path = os.path.join(base_dir_path, 'archive_config.yaml')
     client_config = ClientConfig.load_from_config_file(config_file_path)
     client = client_config.create_client(token)
-
-    client.exists_and_is_published(record_id)
 
     if not force:
         # Update the latest version
@@ -207,7 +196,7 @@ def back_up_finales_db(finales_username,
     :param finales_password: password for the account
     :param archive_token: personal access token for the FINALES account on the selected BIG-MAP Archive
     :param metadata_file_path: relative path to the metadata file used for creating/updating an entry (title, list of authors...)
-    :param record_id: id of the latest published version of an entry to update - by default, a new entry is created
+    :param record_id: id of the version to update - if not provided, a new entry may be created
     :param capabilities_filename: name of the file where capabilities obtained from the FINALES database are stored
     :param requests_filename: name of the file where requests obtained from the FINALES database are stored
     :param results_filename: name of the file where results for requests obtained from the FINALES database are stored
@@ -216,13 +205,8 @@ def back_up_finales_db(finales_username,
     """
     # Create/re-create folder where files are stored temporarily
     base_dir_path = Path(__file__).absolute().parent.parent.parent
-    temp_dir_rel_path = 'data/temp'
-    temp_dir_path = os.path.join(base_dir_path, temp_dir_rel_path)
-
-    if os.path.exists(temp_dir_path):
-        shutil.rmtree(temp_dir_path)
-
-    os.makedirs(temp_dir_path)
+    temp_dir_path = 'data/temp'
+    create_or_recreate_directory(base_dir_path, temp_dir_path)
 
     # Create a FinalesAPIClient object to interact with FINALES server
     config_file_path = os.path.join(base_dir_path, 'finales_config.yaml')
@@ -236,17 +220,17 @@ def back_up_finales_db(finales_username,
     # Get data from the FINALES database
     # 1. Capabilities
     response = client.get_capabilities(finales_token)
-    capabilities_file_path = os.path.join(temp_dir_rel_path, capabilities_filename)
+    capabilities_file_path = os.path.join(base_dir_path, temp_dir_path, capabilities_filename)
     export_to_json_file(base_dir_path, capabilities_file_path, response)
 
     # 2. Requests
     response = client.get_all_requests(finales_token)
-    requests_file_path = os.path.join(temp_dir_rel_path, requests_filename)
+    requests_file_path = os.path.join(base_dir_path, temp_dir_path, requests_filename)
     export_to_json_file(base_dir_path, requests_file_path, response)
 
     # 3. Results for requests
     response = client.get_results_requested(finales_token)
-    results_file_path = os.path.join(temp_dir_rel_path, results_filename)
+    results_file_path = os.path.join(base_dir_path, temp_dir_path, results_filename)
     export_to_json_file(base_dir_path, results_file_path, response)
 
     # Create an ArchiveAPIClient object to interact with the archive
@@ -254,13 +238,14 @@ def back_up_finales_db(finales_username,
     client_config = ClientConfig.load_from_config_file(config_file_path)
     client = client_config.create_client(archive_token)
 
+    title = get_title_from_metadata_file(base_dir_path, metadata_file_path)
+
     now = datetime.now()
     additional_description = f' The back-up was performed on {now.strftime("%B %-d, %Y")} at {now.strftime("%H:%M")}.'
 
     # If record_id is not provided (None is a falsy value)
     if (not record_id):
         # Count the number of published records owned by the user that have the same title as that in the provided metadata file
-        title = get_title_from_metadata_file(base_dir_path, metadata_file_path)
         record_ids = client.get_published_user_records_with_given_title(title)
         nb_records = len(record_ids)
 
@@ -268,91 +253,35 @@ def back_up_finales_db(finales_username,
         if nb_records == 0:
             record_id = create_record(archive_token,
                                       metadata_file_path=metadata_file_path,
-                                      upload_dir_path=temp_dir_rel_path,
+                                      upload_dir_path=temp_dir_path,
                                       additional_description=additional_description,
                                       publish=publish)
+
             return record_id
 
         # User may have forgotten to set record_id to already existing entry version
-        raise Exception(f'Records with the specified title already exist: {record_ids}. '
-                        f'Do you confirm that you prefer creating a new entry than updating an existing entry? '
-                        f'If not, set record_id accordingly.')
+        raise Exception(f'You already own a published record (e.g., {record_ids[0]}) with the same title as your provided title "{title}". '
+                        f'Are you sure that you prefer creating a new entry rather than updating an existing one?')
 
+    # If record_id is provided
+    client.exists_and_is_published(record_id)
 
+    # Extract the title of the published record
+    record_metadata = get_metadata_of_published_record(archive_token, record_id, export=False)
+    record_title = record_metadata['metadata']['title']
 
+    # Compare the title of the published record with the title in the provided metadata file
+    if record_title == title:
+        # Update the entry by creating a new version
+        record_id = update_published_record(archive_token,
+                                            record_id,
+                                            force=True,
+                                            metadata_file_path=metadata_file_path,
+                                            upload_dir_path=temp_dir_path,
+                                            discard=True,
+                                            publish=True)
+        return record_id
 
-
-    # # Get the ids of the latest version on the archive for FINALES
-    # latest_versions = client.get_latest_versions()
-    # number_of_latest_versions = len(latest_versions)
-    #
-    # now = datetime.now()
-    # additional_description = f' This operation was performed on {now.strftime("%B %-d, %Y")} at {now.strftime("%H:%M")}.'
-    #
-    # # Only zero or one id is allowed
-    # if number_of_latest_versions == 0:
-    #     # Create a first record version
-    #     record_id = create_record(archive_token,
-    #                               metadata_file_path='data/input/finales_metadata.json',
-    #                               upload_dir_path='data/output',
-    #                               additional_description=additional_description,
-    #                               publish=True)
-    #     return record_id
-    #
-    # if number_of_latest_versions == 1:
-    #     id = latest_versions[0]['id']
-    #     is_published = latest_versions[0]['is_published']
-    #
-    #     if is_published:
-    #         # Update the current record version
-    #         record_id = update_published_record(archive_token,
-    #                                             id,
-    #                                             force=True,
-    #                                             metadata_file_path='data/input/finales_metadata.json',
-    #                                             upload_dir_path='data/output',
-    #                                             discard=False,
-    #                                             publish=True)
-    #         return record_id
-    #
-    #     # The latest version is in status 'draft'
-    #     client.delete_draft(id)
-    #     record_id = back_up_finales_db(finales_username,
-    #                                    finales_password,
-    #                                    archive_token,
-    #                                    capabilities_file_path,
-    #                                    results_file_path)
-    #     return record_id
-    #
-    # raise Exception('Multiple latest versions')
-
-
-if __name__ == '__main__':
-    # Create environment variables from secrets.env
-    base_dir_path = Path(__file__).absolute().parent.parent.parent
-    load_dotenv(os.path.join(base_dir_path, 'secrets.env'))
-
-    archive_token = os.getenv('ARCHIVE_TOKEN')
-    finales_username = os.getenv('FINALES_USERNAME')
-    finales_password = os.getenv('FINALES_PASSWORD')
-
-    now = datetime.now()
-    additional_description = f' This operation was performed on {now.strftime("%B %-d, %Y")} at {now.strftime("%H:%M")}.'
-    # record_id = create_record(archive_token, additional_description=additional_description)
-    # record_id = create_record(archive_token)
-    #record_id = 'xfmh0-cck14'
-    #response = get_metadata_of_published_record(archive_token, record_id)
-    #print(response)
-    #response = get_metadata_of_published_records(archive_token, all_versions=False)
-    #print(response)
-    # record_id = update_published_record(archive_token,
-    #                                     record_id,
-    #                                     force=True,
-    #                                     metadata_file_path='data/input/metadata.yaml',
-    #                                     upload_dir_path='data/input/upload',
-    #                                     additional_description=additional_description,
-    #                                     discard=True,
-    #                                     publish=True)
-    record_id = back_up_finales_db(finales_username,
-                                    finales_password,
-                                    archive_token)
-    print(record_id)
+    # User may have set record_id to a wrong value
+    raise Exception(f'Your provided title "{title}" differs from the title of the record {record_id}. '
+          f'Are you sure that you prefer updating the existing entry rather than creating a new one?')

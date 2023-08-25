@@ -3,7 +3,8 @@ from .requests import (generate_full_metadata,
                        change_metadata,
                        get_data_files_in_upload_dir,
                        get_name_to_checksum_for_files_in_upload_dir,
-                       get_title_from_metadata_file)
+                       get_title_from_metadata_file,
+                       create_or_recreate_directory)
 
 __all__ = [
     'generate_full_metadata',
@@ -11,5 +12,6 @@ __all__ = [
     'change_metadata',
     'get_data_files_in_upload_dir',
     'get_name_to_checksum_for_files_in_upload_dir',
-    'get_title_from_metadata_file'
+    'get_title_from_metadata_file',
+    'create_or_recreate_directory'
 ]
