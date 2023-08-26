@@ -1,4 +1,3 @@
-"""Commands to manage one record at a time."""
 import click
 from pathlib import Path
 import os
@@ -15,7 +14,7 @@ from big_map_archive_api_client.utils import (get_data_files_in_upload_dir,
 @cmd_root.group('record')
 def cmd_record():
     """
-    Deal with records
+    Manage records on a BIG-MAP Archive.
     """
 
 @cmd_record.command('create')
