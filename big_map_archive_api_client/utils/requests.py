@@ -2,6 +2,8 @@ import json
 import os
 import hashlib
 import datetime
+import shutil
+
 import yaml
 
 
@@ -287,3 +289,14 @@ def create_directory(base_dir_path, dir_path):
 
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
+
+def recreate_directory(base_dir_path, dir_path):
+    """
+    Creates a folder if it does not exist, otherwise recreates it.
+    """
+    dir_path = os.path.join(base_dir_path, dir_path)
+
+    if os.path.exists(dir_path):
+        shutil.rmtree(dir_path)
+
+    os.makedirs(dir_path)
