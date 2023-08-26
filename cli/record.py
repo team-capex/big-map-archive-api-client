@@ -15,7 +15,7 @@ from big_map_archive_api_client.utils import (get_data_files_in_upload_dir,
 @cmd_root.group('record')
 def cmd_record():
     """
-    Deal with single records
+    Deal with records
     """
 
 @cmd_record.command('create')
@@ -85,7 +85,7 @@ def cmd_record_create(config_file,
         click.echo(f'An error occurred. More info: {str(e)}.')
 
 
-@cmd_record.command('get-metadata')
+@cmd_record.command('get')
 @click.option(
     '--config-file',
     show_default=True,
@@ -106,7 +106,7 @@ def cmd_record_create(config_file,
     help='Relative path to the file where the obtained record\'s metadata will be exported to.',
     type=click.Path(exists=False, file_okay=True, dir_okay=False),
 )
-def cmd_record_get_metadata(config_file,
+def cmd_record_get(config_file,
                             record_id,
                             output_file):
     """
@@ -130,7 +130,67 @@ def cmd_record_get_metadata(config_file,
     except requests.exceptions.ConnectionError as e:
         click.echo(f'An error of type ConnectionError occurred. Check the domain name in {config_file}. More info: {str(e)}.')
     except requests.exceptions.HTTPError as e:
-        click.echo(f'An error of type HTTPError occurred. Check your token in {config_file}. More info: {str(e)}.')
+        status_code = e.response.status_code
+        if status_code == 400:
+            click.echo(f'An error of type HTTPError occurred. Check your token in {config_file}. More info: {str(e)}.')
+        elif status_code == 404:
+            click.echo(f'An error of type HTTPError occurred. Check your provided record id {record_id}. More info: {str(e)}.')
+        else:
+            click.echo(f'An error of type HTTPError occurred. More info: {str(e)}.')
+    except Exception as e:
+        click.echo(f'An error occurred. More info: {str(e)}.')
+
+
+@cmd_record.command('get-all')
+@click.option(
+    '--config-file',
+    show_default=True,
+    default='bma_config.yaml',
+    help='Relative path to the file specifying the domain name and a personal access token for the targeted BIG-MAP Archive.',
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+)
+@click.option(
+    '--all-versions',
+    is_flag=True,
+    help='Get all published versions for each entry. By default, only the latest published version is retrieved.'
+)
+@click.option(
+    '--output-file',
+    show_default=True,
+    default='data/output/metadata.json',
+    help='Relative path to the file where the obtained record\'s metadata will be exported to.',
+    type=click.Path(exists=False, file_okay=True, dir_okay=False),
+)
+def cmd_record_get_all(config_file,
+                       all_versions,
+                       output_file):
+    """
+    Get the metadata of the latest published version for each entry on a BIG-MAP Archive and save them to a file.
+    """
+    try:
+        base_dir_path = Path(__file__).absolute().parent.parent
+        output_dir_path = os.path.dirname(output_file)
+        create_directory(base_dir_path, output_dir_path)
+
+        # Create an ArchiveAPIClient object to interact with the archive
+        config_file_path = os.path.join(base_dir_path, config_file)
+        client_config = ClientConfig.load_from_config_file(config_file_path)
+        client = client_config.create_client()
+
+        response_size = '1e6'
+        response = client.get_records(all_versions, response_size)
+
+        export_to_json_file(base_dir_path, output_file, response)
+
+        click.echo(f'The metadata was obtained and saved in {output_file}.')
+    except requests.exceptions.ConnectionError as e:
+        click.echo(f'An error of type ConnectionError occurred. Check the domain name in {config_file}. More info: {str(e)}.')
+    except requests.exceptions.HTTPError as e:
+        status_code = e.response.status_code
+        if status_code == 400:
+            click.echo(f'An error of type HTTPError occurred. Check your token in {config_file}. More info: {str(e)}.')
+        else:
+            click.echo(f'An error of type HTTPError occurred. More info: {str(e)}.')
     except Exception as e:
         click.echo(f'An error occurred. More info: {str(e)}.')
 
@@ -248,7 +308,7 @@ def cmd_record_update(config_file,
         if status_code == 400:
             click.echo(f'An error of type HTTPError occurred. Check your token in {config_file}. More info: {str(e)}.')
         elif status_code == 404:
-            click.echo(f'An error of type HTTPError occurred. Check your provided record_id {record_id}. More info: {str(e)}.')
+            click.echo(f'An error of type HTTPError occurred. Check your provided record id {record_id}. More info: {str(e)}.')
         else:
             click.echo(f'An error of type HTTPError occurred. More info: {str(e)}.')
     except Exception as e:
