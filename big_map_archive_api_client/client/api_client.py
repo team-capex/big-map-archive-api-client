@@ -314,20 +314,6 @@ class ArchiveAPIClient:
         return response.json()
 
 
-    def exists_and_is_published(self, record_id):
-        """
-        Raises an exception if a version of an entry does not exist or is not published
-        """
-        try:
-            self.get_record(record_id)
-        except requests.exceptions.HTTPError as err:
-            if err.response.status_code == 404:
-                print(f'Invalid record_id {record_id}: the record should exist and be published')
-
-            raise
-
-
-
     def get_latest_versions(self):
         """
         Gets the ids and the statuses of the latest version of all entries belonging to a user
@@ -351,6 +337,30 @@ class ArchiveAPIClient:
         record_ids = [r['id'] for r in user_records if (r['is_published'] and r['metadata']['title'] == title)]
 
         return record_ids
+
+
+    def exists_and_is_published(self, record_id):
+        """
+        Returns True if the record id corresponds to a published record on the BIG-MAP Archive that is owned by the user, False otherwise
+        """
+        # Gets the ids of the records owned by the user that are published
+        all_versions = True
+        response_size = int(float('1e6'))
+        response = self.get_user_records(all_versions, response_size)
+        user_records = response['hits']['hits']
+        record_ids = [r['id'] for r in user_records if r['is_published']]
+
+        return True if record_id in record_ids else False
+
+
+    def get_record_title(self, record_id):
+        """
+        Returns the title of a published record
+        """
+        response = self.get_record(record_id)
+        title = response['metadata']['title']
+
+        return title
 
 
 
