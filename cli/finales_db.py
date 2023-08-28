@@ -143,10 +143,10 @@ def cmd_finales_db_copy(ctx,
             ctx.invoke(cmd_record_update,
                        config_file=bma_config_file,
                        record_id=record_id,
-                       update_version=False,
+                       update_only=False,
                        metadata_file=metadata_file,
                        data_files=temp_dir_path,
-                       import_links=False,
+                       link_all_files_from_previous=False,
                        publish=True)
         else:
             # Ask for confirmation
@@ -158,14 +158,14 @@ def cmd_finales_db_copy(ctx,
             ctx.invoke(cmd_record_update,
                        config_file=bma_config_file,
                        record_id=record_id,
-                       update_version=False,
+                       update_only=False,
                        metadata_file=metadata_file,
                        data_files=temp_dir_path,
-                       import_links=False,
+                       link_all_files_from_previous=False,
                        publish=True)
 
-    except click.Abort as e:
-        click.echo('Aborted. More info: {str(e)}.')
+    except click.Abort:
+        click.echo('Aborted.')
     except requests.exceptions.ConnectionError as e:
         click.echo(f'An error of type ConnectionError occurred. Check domain names/IP addresses/ports in {bma_config_file} and {finales_config_file}. More info: {str(e)}.')
     except requests.exceptions.HTTPError as e:
