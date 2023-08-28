@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a command line client for BIG-MAP Archive that can create, update, and retrieve records.
+This is a command line client for a BIG-MAP Archive to create, update, or retrieve records.
 
 ## Usage
 
