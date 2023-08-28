@@ -58,7 +58,7 @@ def cmd_record_create(config_file,
         client = client_config.create_client()
 
         # Create draft from input metadata.yaml
-        response = client.post_records(base_dir_path, metadata_file, additional_description='')
+        response = client.post_records(base_dir_path, metadata_file)
         record_id = response['id']
 
         # Upload data files and insert links in the draft's metadata
@@ -259,7 +259,7 @@ def cmd_record_update(config_file,
             record_id = response['id']  # Unchanged value for record_id
 
             # Update the draft's metadata
-            client.update_metadata(record_id, base_dir_path, metadata_file, additional_description='')
+            client.update_metadata(record_id, base_dir_path, metadata_file)
 
             # Publish the draft (update published record)
             client.post_publish(record_id)
@@ -272,7 +272,7 @@ def cmd_record_update(config_file,
             record_id = response['id']  # Modified value for record_id
 
             # Update the draft's metadata
-            client.update_metadata(record_id, base_dir_path, metadata_file, additional_description='')
+            client.update_metadata(record_id, base_dir_path, metadata_file)
 
             # Import all file links from the published version after cleaning
             filenames = client.get_links(record_id)
