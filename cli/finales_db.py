@@ -50,12 +50,18 @@ def cmd_finales_db():
     help='Relative path to the file that contains the metadata (title, list of authors, etc) for creating a new version.',
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
+@click.option(
+    '--no-publish',
+    is_flag=True,
+    help='Do not publish the newly created version. This is discouraged in production. If you select this option, either publish or delete the newly created draft, e.g., via the GUI.'
+)
 @click.pass_context
 def cmd_finales_db_copy(ctx,
                         bma_config_file,
                         finales_config_file,
                         record_id,
-                        metadata_file):
+                        metadata_file,
+                        no_publish):
     """
     Perform a partial back-up from the database of a FINALES server to a BIG-MAP Archive. A new entry version is created and published. Its linked files include data related to capabilities, requests, and results for requests.
     """
@@ -103,6 +109,8 @@ def cmd_finales_db_copy(ctx,
         now = datetime.now()
         additional_description = f' The back-up was performed on {now.strftime("%B %-d, %Y")} at {now.strftime("%H:%M")}.'
 
+        publish = not no_publish
+
         # Is a record id provided by the user?
         if record_id == '':
             # Check whether the archive user already owns a published record with that title
@@ -115,54 +123,53 @@ def cmd_finales_db_copy(ctx,
                            config_file=bma_config_file,
                            metadata_file=metadata_file,
                            data_files=temp_dir_path,
-                           publish=True)
+                           publish=publish)
             else:
                 # Ask for confirmation
-                click.echo(f'You already own a published record on the BIG-MAP Archive with the same title (record {record_ids[0]}).')
-                click.echo('But you did not provide that record id via the option "--record-id".')
-                click.confirm('Do you prefer creating a new entry rather than updating the existing one?', abort=True)
+                click.echo(f'Found a published record with the title "{title}" on the BIG-MAP Archive.')
+                click.echo(f'To update the existing entry instead of creating a new one, execute the command with the option --record-id="{record_ids[0]}".')
+                click.confirm('Do you want to create a new entry?', abort=True)
 
                 # Create a new entry
                 ctx.invoke(cmd_record_create,
                            config_file=bma_config_file,
                            metadata_file=metadata_file,
                            data_files=temp_dir_path,
-                           publish=True)
-
-        if not client.exists_and_is_published(record_id):
-            # The provided record id does not correspond to a published record on the BIG-MAP Archive owned by the user
-            click.echo(f'Invalid record id: {record_id}. You do not own a published record with this id.')
-            raise click.Abort
-
-        # Extract the title of the published record
-        record_title = client.get_record_title(record_id)
-
-        if title == record_title:
-            # If the title in the metadata file matches the title of the published record, it is assumed that the value given to the record id is intentional
-            # Update the entry by creating a new version
-            ctx.invoke(cmd_record_update,
-                       config_file=bma_config_file,
-                       record_id=record_id,
-                       update_only=False,
-                       metadata_file=metadata_file,
-                       data_files=temp_dir_path,
-                       link_all_files_from_previous=False,
-                       publish=True)
+                           publish=publish)
         else:
-            # Ask for confirmation
-            click.echo(f'The title in your provided metadata file: {title}.')
-            click.echo(f'The title of the published record with id {record_id}: {record_title}.')
-            click.confirm(f'Do you want to continue?', abort=True)
+            if not client.exists_and_is_published(record_id):
+                # The provided record id does not correspond to a published record on the BIG-MAP Archive owned by the user
+                click.echo(f'Invalid record id: {record_id}. You do not own a published record with this id.')
+                raise click.Abort
 
-            # Update the entry by creating a new version
-            ctx.invoke(cmd_record_update,
-                       config_file=bma_config_file,
-                       record_id=record_id,
-                       update_only=False,
-                       metadata_file=metadata_file,
-                       data_files=temp_dir_path,
-                       link_all_files_from_previous=False,
-                       publish=True)
+            # Extract the title of the published record
+            record_title = client.get_record_title(record_id)
+
+            if title == record_title:
+                # If the title in the metadata file matches the title of the published record, it is assumed that the value given to the record id is intentional
+                # Update the entry by creating a new version
+                ctx.invoke(cmd_record_update,
+                           config_file=bma_config_file,
+                           record_id=record_id,
+                           update_only=False,
+                           metadata_file=metadata_file,
+                           data_files=temp_dir_path,
+                           link_all_files_from_previous=False,
+                           publish=publish)
+            else:
+                # Ask for confirmation
+                click.echo(f'The title "{title}" in the metadata file differs from the title of the published record "{record_title}".')
+                click.confirm(f'Do you want to continue with the new title?', abort=True)
+
+                # Update the entry by creating a new version
+                ctx.invoke(cmd_record_update,
+                           config_file=bma_config_file,
+                           record_id=record_id,
+                           update_only=False,
+                           metadata_file=metadata_file,
+                           data_files=temp_dir_path,
+                           link_all_files_from_previous=False,
+                           publish=publish)
 
     except click.Abort:
         click.echo('Aborted.')
