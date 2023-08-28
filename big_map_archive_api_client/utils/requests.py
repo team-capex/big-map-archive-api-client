@@ -8,7 +8,7 @@ import yaml
 
 
 
-def generate_full_metadata(base_dir_path, metadata_file_path, additional_description):
+def generate_full_metadata(base_dir_path, metadata_file_path):
     """
     Generates a record's full metadata from a YAML file containing only partial metadata
     """
@@ -41,7 +41,7 @@ def generate_full_metadata(base_dir_path, metadata_file_path, additional_descrip
     full_metadata = insert_resource_type(full_metadata, partial_metadata)
     full_metadata['metadata']['title'] = partial_metadata['title']
     full_metadata = insert_creators(full_metadata, partial_metadata)
-    full_metadata['metadata']['description'] = partial_metadata['description'] + additional_description
+    full_metadata['metadata']['description'] = partial_metadata['description']
     full_metadata = insert_rights(full_metadata, partial_metadata)
     full_metadata = insert_subjects(full_metadata, partial_metadata)
     full_metadata = insert_related_identifiers(full_metadata, partial_metadata)
@@ -203,7 +203,7 @@ def export_to_json_file(base_dir_path, output_file_path, data):
         json.dump(data, f, indent=4, sort_keys=True)
 
 
-def change_metadata(record_metadata, base_dir_path, metadata_file_path, additional_description):
+def change_metadata(record_metadata, base_dir_path, metadata_file_path):
     """
     Updates a record's metadata from a YAML file containing only partial metadata
     """
@@ -215,7 +215,7 @@ def change_metadata(record_metadata, base_dir_path, metadata_file_path, addition
     record_metadata = insert_resource_type(record_metadata, partial_metadata)
     record_metadata['metadata']['title'] = partial_metadata['title']
     record_metadata = insert_creators(record_metadata, partial_metadata)
-    record_metadata['metadata']['description'] = partial_metadata['description'] + additional_description
+    record_metadata['metadata']['description'] = partial_metadata['description']
     record_metadata = insert_rights(record_metadata, partial_metadata)
     record_metadata = insert_subjects(record_metadata, partial_metadata)
     record_metadata = insert_related_identifiers(record_metadata, partial_metadata)

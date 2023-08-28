@@ -21,14 +21,14 @@ class ArchiveAPIClient:
         self._connection = RestAPIConnection(domain_name)
         self._token = token
 
-    def post_records(self, base_dir_path, metadata_file_path, additional_description):
+    def post_records(self, base_dir_path, metadata_file_path):
         """
         Creates a draft on the archive from provided metadata
         Raises an HTTPError exception if the request fails
         Returns the newly created draft's id
         """
         resource_path = '/api/records'
-        metadata = generate_full_metadata(base_dir_path, metadata_file_path, additional_description)
+        metadata = generate_full_metadata(base_dir_path, metadata_file_path)
         payload = json.dumps(metadata)
         response = self._connection.post(resource_path, self._token, payload)
         response.raise_for_status()
@@ -195,12 +195,12 @@ class ArchiveAPIClient:
         response.raise_for_status()
         return response.json()
 
-    def update_metadata(self, record_id, base_dir_path, metadata_file_path, additional_description):
+    def update_metadata(self, record_id, base_dir_path, metadata_file_path):
         """
         Updates the metadata of a draft using a file's content
         """
         record_metadata = self.get_draft(record_id)
-        record_metadata = change_metadata(record_metadata, base_dir_path, metadata_file_path, additional_description)
+        record_metadata = change_metadata(record_metadata, base_dir_path, metadata_file_path)
         self.put_draft(record_id, record_metadata)
 
     def upload_files(self, record_id, base_dir_path, upload_dir_path, filenames):
