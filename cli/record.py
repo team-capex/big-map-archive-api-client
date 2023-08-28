@@ -230,7 +230,7 @@ def cmd_record_get_all(config_file,
 @click.option(
     '--link-all-files-from-previous',
     is_flag=True,
-    help='Have all files that are linked to the previous version also appear in the new version. If the content of a file changed since it was linked to the previous version, only the latest content appears in the new version.'
+    help='Link all files that are already linked to the previous version to the new version, with the exception of files whose content changed.'
 )
 @click.option(
     '--publish',
