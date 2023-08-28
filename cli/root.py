@@ -6,6 +6,6 @@ import click
 @click.group('bma')
 def cmd_root():
     """
-    Command line interface for interacting with BIG-MAP Archive
+    Command line client to create, update, and retrieve records on a BIG-MAP Archive.
     """
     pass

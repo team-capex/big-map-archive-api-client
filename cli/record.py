@@ -151,7 +151,7 @@ def cmd_record_get(config_file,
 @click.option(
     '--all-versions',
     is_flag=True,
-    help='Get all published versions for each entry. By default, only the latest published version is retrieved.'
+    help='Get all published versions for each entry. By default, only the latest published version for each entry is retrieved.'
 )
 @click.option(
     '--output-file',
@@ -209,9 +209,9 @@ def cmd_record_get_all(config_file,
     type=str
 )
 @click.option(
-    '--update-version',
+    '--update-only',
     is_flag=True,
-    help='Update the metadata of the published version. By default, a new version is created.'
+    help='Update the metadata of the published version, without creating a new version. By default, a new version is created.'
 )
 @click.option(
     '--metadata-file',
@@ -228,9 +228,9 @@ def cmd_record_get_all(config_file,
     type=click.Path(exists=True, file_okay=False, dir_okay=True)
 )
 @click.option(
-    '--import-links',
+    '--link-all-files-from-previous',
     is_flag=True,
-    help='Import file links from the published version into the newly created version, except for the files whose content was changed.'
+    help='Have all files that are linked to the previous version also appear in the new version. If the content of a file changed since it was linked to the previous version, only the latest content appears in the new version.'
 )
 @click.option(
     '--publish',
@@ -239,10 +239,10 @@ def cmd_record_get_all(config_file,
 )
 def cmd_record_update(config_file,
                       record_id,
-                      update_version,
+                      update_only,
                       metadata_file,
                       data_files,
-                      import_links,
+                      link_all_files_from_previous,
                       publish):
     """
     Update a published version of an archive entry, or create a new version and optionally publish it. When updating a published version, only the metadata (title, list of authors, etc) can be modified.
@@ -253,7 +253,7 @@ def cmd_record_update(config_file,
         client_config = ClientConfig.load_from_config_file(config_file_path)
         client = client_config.create_client()
 
-        if update_version:
+        if update_only:
             # Create a draft (same version) and get the draft's id (same id)
             response = client.post_draft(record_id)
             record_id = response['id']  # Unchanged value for record_id
@@ -280,7 +280,7 @@ def cmd_record_update(config_file,
             client.post_file_import(record_id)
 
             # Get a list of all file links to be removed and remove them
-            filenames = client.get_links_to_delete(record_id, base_dir_path, data_files, import_links)
+            filenames = client.get_links_to_delete(record_id, base_dir_path, data_files, link_all_files_from_previous)
             client.delete_links(record_id, filenames)
 
             # 5. Get a list of files to upload and upload them

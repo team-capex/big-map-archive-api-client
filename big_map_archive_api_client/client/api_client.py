@@ -277,7 +277,7 @@ class ArchiveAPIClient:
 
         return filenames
 
-    def get_links_to_delete(self, record_id, base_dir_path, upload_dir_path, import_links):
+    def get_links_to_delete(self, record_id, base_dir_path, upload_dir_path, link_all_files_from_previous):
         """
         Reasons for deleting a file link in a draft:
           - the linked file is not in the input folder and 'discard' is set to 'True'
@@ -285,7 +285,7 @@ class ArchiveAPIClient:
         """
         filenames = self.get_changed_content_files(record_id, base_dir_path, upload_dir_path)
 
-        if not import_links:
+        if not link_all_files_from_previous:
             filenames += self.get_missing_files(record_id, base_dir_path, upload_dir_path)
 
         # Remove duplicates
