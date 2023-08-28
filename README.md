@@ -141,12 +141,10 @@ Options:
   --data-files DIRECTORY          Relative path to the data files to be linked
                                   to the newly created version.  [default:
                                   data/input/upload]
-  --link-all-files-from-previous  Have all files that are linked to the
-                                  previous version also appear in the new
-                                  version. If the content of a file changed
-                                  since it was linked to the previous version,
-                                  only the latest content appears in the new
-                                  version.
+  --link-all-files-from-previous  Link all files that are already linked to
+                                  the previous version to the new version,
+                                  with the exception of files whose content
+                                  changed.
   --publish                       Publish the newly created version.
   --help                          Show this message and exit.
 ```
@@ -198,6 +196,10 @@ Options:
                               metadata (title, list of authors, etc) for
                               creating a new version.  [default:
                               data/input/metadata.yaml]
+  --no-publish                Do not publish the newly created version. This
+                              is discouraged in production. If you select this
+                              option, either publish or delete the newly
+                              created draft, e.g., via the GUI.
   --help                      Show this message and exit.
 ````
 
