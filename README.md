@@ -14,14 +14,13 @@ $ bma --help
 ```text
 Usage: bma [OPTIONS] COMMAND [ARGS]...
 
-  Command line client to create, update, and retrieve records on a BIG-MAP
-  Archive.
+  Command line client to interact with a BIG-MAP Archive.
 
 Options:
   --help  Show this message and exit.
 
 Commands:
-  finales-db  Copy data from the database of a FINALES server to a BIG-MAP Archive.
+  finales-db  Copy data from the database of a FINALES server to a...
   record      Manage records on a BIG-MAP Archive.
 ```
 
