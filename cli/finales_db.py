@@ -51,6 +51,11 @@ def cmd_finales_db():
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
 @click.option(
+    '--link-all-files-from-previous',
+    is_flag=True,
+    help='Link all files that are already linked to the previous version to the new version, with the exception of files whose content changed.'
+)
+@click.option(
     '--no-publish',
     is_flag=True,
     help='Do not publish the newly created version. This is discouraged in production. If you select this option, either publish or delete the newly created draft, e.g., via the GUI.'
@@ -61,6 +66,7 @@ def cmd_finales_db_copy(ctx,
                         finales_config_file,
                         record_id,
                         metadata_file,
+                        link_all_files_from_previous,
                         no_publish):
     """
     Perform a partial back-up from the database of a FINALES server to a BIG-MAP Archive. A new entry version is created and published. Its linked files include data related to capabilities, requests, and results for requests.
@@ -154,7 +160,7 @@ def cmd_finales_db_copy(ctx,
                            update_only=False,
                            metadata_file=metadata_file,
                            data_files=temp_dir_path,
-                           link_all_files_from_previous=False,
+                           link_all_files_from_previous=link_all_files_from_previous,
                            publish=publish)
             else:
                 # Ask for confirmation
@@ -168,7 +174,7 @@ def cmd_finales_db_copy(ctx,
                            update_only=False,
                            metadata_file=metadata_file,
                            data_files=temp_dir_path,
-                           link_all_files_from_previous=False,
+                           link_all_files_from_previous=link_all_files_from_previous,
                            publish=publish)
 
     except click.Abort:
