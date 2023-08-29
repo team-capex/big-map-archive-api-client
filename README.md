@@ -180,26 +180,30 @@ Usage: bma finales-db back-up [OPTIONS]
   include data related to capabilities, requests, and results for requests.
 
 Options:
-  --bma-config-file FILE      Relative path to the file specifying the domain
-                              name and a personal access token for the
-                              targeted BIG-MAP Archive.  [default:
-                              bma_config.yaml]
-  --finales-config-file FILE  Relative path to the file specifying the IP
-                              address, the port, and the credentials of a user
-                              account for the targeted FINALES server.
-                              [default: finales_config.yaml]
-  --record-id TEXT            Id of the published version for the previous
-                              back-up (e.g., "pxrf9-zfh45"). For the first
-                              back-up, leave to the default.
-  --metadata-file FILE        Relative path to the file that contains the
-                              metadata (title, list of authors, etc) for
-                              creating a new version.  [default:
-                              data/input/metadata.yaml]
-  --no-publish                Do not publish the newly created version. This
-                              is discouraged in production. If you select this
-                              option, either publish or delete the newly
-                              created draft, e.g., via the GUI.
-  --help                      Show this message and exit.
+  --bma-config-file FILE          Relative path to the file specifying the
+                                  domain name and a personal access token for
+                                  the targeted BIG-MAP Archive.  [default:
+                                  bma_config.yaml]
+  --finales-config-file FILE      Relative path to the file specifying the IP
+                                  address, the port, and the credentials of a
+                                  user account for the targeted FINALES
+                                  server.  [default: finales_config.yaml]
+  --record-id TEXT                Id of the published version for the previous
+                                  back-up (e.g., "pxrf9-zfh45"). For the first
+                                  back-up, leave to the default.
+  --metadata-file FILE            Relative path to the file that contains the
+                                  metadata (title, list of authors, etc) for
+                                  creating a new version.  [default:
+                                  data/input/metadata.yaml]
+  --link-all-files-from-previous  Link all files that are already linked to
+                                  the previous version to the new version,
+                                  with the exception of files whose content
+                                  changed.
+  --no-publish                    Do not publish the newly created version.
+                                  This is discouraged in production. If you
+                                  select this option, either publish or delete
+                                  the newly created draft, e.g., via the GUI.
+  --help                          Show this message and exit.
 ````
 
 ## Support
