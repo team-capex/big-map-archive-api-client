@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a command line client for a BIG-MAP Archive to create, update, or retrieve records.
+This is a command line client to interact with BIG-MAP Archive data repositories.
 
 ## Usage
 
@@ -55,14 +55,18 @@ Usage: bma record create [OPTIONS]
   Create a record on a BIG-MAP Archive and optionally publish it.
 
 Options:
-  --config-file FILE      Relative path to the file specifying the domain name
+  --config-file FILE      Path to the YAML file that specifies the domain name
                           and a personal access token for the targeted BIG-MAP
-                          Archive.  [default: bma_config.yaml]
-  --metadata-file FILE    Relative path to the file for the record's metadata
-                          (title, list of authors, etc).  [default:
-                          data/input/metadata.yaml]
-  --data-files DIRECTORY  Relative path to the data files to be uploaded and
-                          linked to the record.  [default: data/input/upload]
+                          Archive. See bma_config.yaml in the GitHub
+                          repository.  [required]
+  --metadata-file FILE    Path to the YAML file for the record's metadata
+                          (title, list of authors, etc). See
+                          data/input/example/create_record/metadata.yaml in
+                          the GitHub repository.  [required]
+  --data-files DIRECTORY  Path to the directory that contains the data files
+                          to be uploaded and linked to the record. See
+                          data/input/example/create_record/upload in the
+                          GitHub repository.  [required]
   --publish               Publish the created record.
   --help                  Show this message and exit.
 ```
@@ -78,14 +82,14 @@ Usage: bma record get [OPTIONS]
   save it to a file.
 
 Options:
-  --config-file FILE  Relative path to the file specifying the domain name and
+  --config-file FILE  Path to the YAML file that specifies the domain name and
                       a personal access token for the targeted BIG-MAP
-                      Archive.  [default: bma_config.yaml]
+                      Archive. See bma_config.yaml in the GitHub repository.
+                      [required]
   --record-id TEXT    Id of the published version of an archive entry (e.g.,
                       "pxrf9-zfh45").  [required]
-  --output-file FILE  Relative path to the file where the obtained record's
-                      metadata will be exported to.  [default:
-                      data/output/metadata.json]
+  --output-file FILE  Path to the JSON file where the obtained record's
+                      metadata will be exported to.  [required]
   --help              Show this message and exit.
 ```
 
@@ -100,14 +104,15 @@ Usage: bma record get-all [OPTIONS]
   Archive and save them to a file.
 
 Options:
-  --config-file FILE  Relative path to the file specifying the domain name and
+  --config-file FILE  Path to the YAML file that specifies the domain name and
                       a personal access token for the targeted BIG-MAP
-                      Archive.  [default: bma_config.yaml]
+                      Archive. See bma_config.yaml in the GitHub repository.
+                      [required]
   --all-versions      Get all published versions for each entry. By default,
-                      only the latest published version for each entry is retrieved.
-  --output-file FILE  Relative path to the file where the obtained record's
-                      metadata will be exported to.  [default:
-                      data/output/metadata.json]
+                      only the latest published version for each entry is
+                      retrieved.
+  --output-file FILE  Path to the JSON file where the obtained record's
+                      metadata will be exported to.  [required]
   --help              Show this message and exit.
 ```
 
@@ -123,23 +128,27 @@ Usage: bma record update [OPTIONS]
   (title, list of authors, etc) can be modified.
 
 Options:
-  --config-file FILE              Relative path to the file specifying the
+  --config-file FILE              Path to the YAML file that specifies the
                                   domain name and a personal access token for
-                                  the targeted BIG-MAP Archive.  [default:
-                                  bma_config.yaml]
+                                  the targeted BIG-MAP Archive. See
+                                  bma_config.yaml in the GitHub repository.
+                                  [required]
   --record-id TEXT                Id of the published version (e.g.,
                                   "pxrf9-zfh45").  [required]
   --update-only                   Update the metadata of the published
                                   version, without creating a new version. By
                                   default, a new version is created.
-  --metadata-file FILE            Relative path to the file that contains the
+  --metadata-file FILE            Path to the YAML file that contains the
                                   metadata (title, list of authors, etc) for
                                   updating the published version or creating a
-                                  new version.  [default:
-                                  data/input/metadata.yaml]
-  --data-files DIRECTORY          Relative path to the data files to be linked
-                                  to the newly created version.  [default:
-                                  data/input/upload]
+                                  new version. See data/input/example/update_r
+                                  ecord/metadata.yaml in the GitHub
+                                  repository.  [required]
+  --data-files DIRECTORY          Path to the directory that contains the data
+                                  files to be linked to the newly created
+                                  version. See
+                                  data/input/example/update_record/upload in
+                                  the GitHub repository.  [required]
   --link-all-files-from-previous  Link all files that are already linked to
                                   the previous version to the new version,
                                   with the exception of files whose content
@@ -163,9 +172,7 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  back-up  Perform a partial back-up from the database of a FINALES server to a BIG-MAP
-  Archive. A new entry version is created and published. Its linked files
-  include data related to capabilities, requests, and results for requests.
+  back-up  Perform a partial back-up from the database of a FINALES...
 ```
 
 ```bash
@@ -180,21 +187,24 @@ Usage: bma finales-db back-up [OPTIONS]
   include data related to capabilities, requests, and results for requests.
 
 Options:
-  --bma-config-file FILE          Relative path to the file specifying the
+  --bma-config-file FILE          Path to the YAML file that specifies the
                                   domain name and a personal access token for
-                                  the targeted BIG-MAP Archive.  [default:
-                                  bma_config.yaml]
-  --finales-config-file FILE      Relative path to the file specifying the IP
+                                  the targeted BIG-MAP Archive. See
+                                  bma_config.yaml in the GitHub repository.
+                                  [required]
+  --finales-config-file FILE      Path to the YAML file that specifies the IP
                                   address, the port, and the credentials of a
                                   user account for the targeted FINALES
-                                  server.  [default: finales_config.yaml]
+                                  server. See finales_config.yaml in the
+                                  GitHub repository.  [required]
   --record-id TEXT                Id of the published version for the previous
                                   back-up (e.g., "pxrf9-zfh45"). For the first
                                   back-up, leave to the default.
-  --metadata-file FILE            Relative path to the file that contains the
+  --metadata-file FILE            Path to the YAML file that contains the
                                   metadata (title, list of authors, etc) for
-                                  creating a new version.  [default:
-                                  data/input/metadata.yaml]
+                                  creating a new version. See data/input/examp
+                                  le/create_record/metadata.yaml in the GitHub
+                                  repository.  [required]
   --link-all-files-from-previous  Link all files that are already linked to
                                   the previous version to the new version,
                                   with the exception of files whose content
