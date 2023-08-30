@@ -24,16 +24,14 @@ def cmd_finales_db():
 @cmd_finales_db.command('back-up')
 @click.option(
     '--bma-config-file',
-    show_default=True,
-    default='bma_config.yaml',
-    help='Relative path to the file specifying the domain name and a personal access token for the targeted BIG-MAP Archive.',
+    required=True,
+    help='Path to the YAML file that specifies the domain name and a personal access token for the targeted BIG-MAP Archive. See bma_config.yaml in the GitHub repository.',
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
 @click.option(
     '--finales-config-file',
-    show_default=True,
-    default='finales_config.yaml',
-    help='Relative path to the file specifying the IP address, the port, and the credentials of a user account for the targeted FINALES server.',
+    required=True,
+    help='Path to the YAML file that specifies the IP address, the port, and the credentials of a user account for the targeted FINALES server. See finales_config.yaml in the GitHub repository.',
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
 @click.option(
@@ -45,9 +43,8 @@ def cmd_finales_db():
 )
 @click.option(
     '--metadata-file',
-    show_default=True,
-    default='data/input/metadata.yaml',
-    help='Relative path to the file that contains the metadata (title, list of authors, etc) for creating a new version.',
+    required=True,
+    help='Path to the YAML file that contains the metadata (title, list of authors, etc) for creating a new version. See data/input/example/create_record/metadata.yaml in the GitHub repository.',
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
 @click.option(
@@ -73,7 +70,7 @@ def cmd_finales_db_copy(ctx,
     """
     try:
         # Create/re-create folder where files are stored temporarily
-        base_dir_path = Path(__file__).absolute().parent.parent
+        base_dir_path = os.getcwd()
         temp_dir_path = 'data/temp'
         recreate_directory(base_dir_path, temp_dir_path)
 

@@ -20,23 +20,20 @@ def cmd_record():
 @cmd_record.command('create')
 @click.option(
     '--config-file',
-    show_default=True,
-    default='bma_config.yaml',
-    help='Relative path to the file specifying the domain name and a personal access token for the targeted BIG-MAP Archive.',
+    required=True,
+    help='Path to the YAML file that specifies the domain name and a personal access token for the targeted BIG-MAP Archive. See bma_config.yaml in the GitHub repository.',
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
 @click.option(
     '--metadata-file',
-    show_default=True,
-    default='data/input/metadata.yaml',
-    help='Relative path to the file for the record\'s metadata (title, list of authors, etc).',
+    required=True,
+    help='Path to the YAML file for the record\'s metadata (title, list of authors, etc). See data/input/example/create_record/metadata.yaml in the GitHub repository.',
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
 @click.option(
     '--data-files',
-    show_default=True,
-    default='data/input/upload',
-    help='Relative path to the data files to be uploaded and linked to the record.',
+    required=True,
+    help='Path to the directory that contains the data files to be uploaded and linked to the record. See data/input/example/create_record/upload in the GitHub repository.',
     type=click.Path(exists=True, file_okay=False, dir_okay=True)
 )
 @click.option(
@@ -52,7 +49,7 @@ def cmd_record_create(config_file,
     Create a record on a BIG-MAP Archive and optionally publish it.
     """
     try:
-        base_dir_path = Path(__file__).absolute().parent.parent
+        base_dir_path = os.getcwd()
         config_file_path = os.path.join(base_dir_path, config_file)
         client_config = ClientConfig.load_from_config_file(config_file_path)
         client = client_config.create_client()
@@ -87,9 +84,8 @@ def cmd_record_create(config_file,
 @cmd_record.command('get')
 @click.option(
     '--config-file',
-    show_default=True,
-    default='bma_config.yaml',
-    help='Relative path to the file specifying the domain name and a personal access token for the targeted BIG-MAP Archive.',
+    required=True,
+    help='Path to the YAML file that specifies the domain name and a personal access token for the targeted BIG-MAP Archive. See bma_config.yaml in the GitHub repository.',
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
 @click.option(
@@ -100,9 +96,8 @@ def cmd_record_create(config_file,
 )
 @click.option(
     '--output-file',
-    show_default=True,
-    default='data/output/metadata.json',
-    help='Relative path to the file where the obtained record\'s metadata will be exported to.',
+    required=True,
+    help='Path to the JSON file where the obtained record\'s metadata will be exported to.',
     type=click.Path(exists=False, file_okay=True, dir_okay=False),
 )
 def cmd_record_get(config_file,
@@ -112,7 +107,7 @@ def cmd_record_get(config_file,
     Get the metadata of a published version of an entry on a BIG-MAP Archive and save it to a file.
     """
     try:
-        base_dir_path = Path(__file__).absolute().parent.parent
+        base_dir_path = os.getcwd()
         output_dir_path = os.path.dirname(output_file)
         create_directory(base_dir_path, output_dir_path)
 
@@ -143,9 +138,8 @@ def cmd_record_get(config_file,
 @cmd_record.command('get-all')
 @click.option(
     '--config-file',
-    show_default=True,
-    default='bma_config.yaml',
-    help='Relative path to the file specifying the domain name and a personal access token for the targeted BIG-MAP Archive.',
+    required=True,
+    help='Path to the YAML file that specifies the domain name and a personal access token for the targeted BIG-MAP Archive. See bma_config.yaml in the GitHub repository.',
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
 @click.option(
@@ -155,9 +149,8 @@ def cmd_record_get(config_file,
 )
 @click.option(
     '--output-file',
-    show_default=True,
-    default='data/output/metadata.json',
-    help='Relative path to the file where the obtained record\'s metadata will be exported to.',
+    required=True,
+    help='Path to the JSON file where the obtained record\'s metadata will be exported to.',
     type=click.Path(exists=False, file_okay=True, dir_okay=False),
 )
 def cmd_record_get_all(config_file,
@@ -167,7 +160,7 @@ def cmd_record_get_all(config_file,
     Get the metadata of the latest published version for each entry on a BIG-MAP Archive and save them to a file.
     """
     try:
-        base_dir_path = Path(__file__).absolute().parent.parent
+        base_dir_path = os.getcwd()
         output_dir_path = os.path.dirname(output_file)
         create_directory(base_dir_path, output_dir_path)
 
@@ -197,9 +190,8 @@ def cmd_record_get_all(config_file,
 @cmd_record.command('update')
 @click.option(
     '--config-file',
-    show_default=True,
-    default='bma_config.yaml',
-    help='Relative path to the file specifying the domain name and a personal access token for the targeted BIG-MAP Archive.',
+    required=True,
+    help='Path to the YAML file that specifies the domain name and a personal access token for the targeted BIG-MAP Archive. See bma_config.yaml in the GitHub repository.',
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
 @click.option(
@@ -215,16 +207,14 @@ def cmd_record_get_all(config_file,
 )
 @click.option(
     '--metadata-file',
-    show_default=True,
-    default='data/input/metadata.yaml',
-    help='Relative path to the file that contains the metadata (title, list of authors, etc) for updating the published version or creating a new version.',
+    required=True,
+    help='Path to the YAML file that contains the metadata (title, list of authors, etc) for updating the published version or creating a new version. See data/input/example/update_record/metadata.yaml in the GitHub repository.',
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
 @click.option(
     '--data-files',
-    show_default=True,
-    default='data/input/upload',
-    help='Relative path to the data files to be linked to the newly created version.',
+    required=True,
+    help='Path to the directory that contains the data files to be linked to the newly created version. See data/input/example/update_record/upload in the GitHub repository.',
     type=click.Path(exists=True, file_okay=False, dir_okay=True)
 )
 @click.option(
@@ -248,7 +238,7 @@ def cmd_record_update(config_file,
     Update a published version of an archive entry, or create a new version and optionally publish it. When updating a published version, only the metadata (title, list of authors, etc) can be modified.
     """
     try:
-        base_dir_path = Path(__file__).absolute().parent.parent
+        base_dir_path = os.getcwd()
         config_file_path = os.path.join(base_dir_path, config_file)
         client_config = ClientConfig.load_from_config_file(config_file_path)
         client = client_config.create_client()
