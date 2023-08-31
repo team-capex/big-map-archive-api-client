@@ -77,7 +77,7 @@ password: "<replace>" # Replace by valid password
 
 ### Metadata files
 
-Several commands (e.g., `bma record create`) use of a YAML file specified by the command option `--metadata-file` to create/update a record's metadata. 
+Several commands (e.g., `bma record create`) use a YAML file specified by the command option `--metadata-file` to create/update a record's metadata. 
 We recommend to place such a file in your project directory and to name it `metadata.yaml`. Its content should be similar to:
 
 ```yaml
