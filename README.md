@@ -15,6 +15,7 @@
   - [Create records](#create-records)
   - [Update records](#update-records)
   - [Back up FINALES databases](#back-up-finales-databases)
+- [Back-up policy for FINALES databases](#back-up-policy-for-finales-databases)
   
 ## Quick start
 
@@ -57,22 +58,22 @@ This is indicated by the command options `--config-file` and `--bma-config-file`
 We also recommend to place such a file in your project directory and to name it `bma_config.yaml`. Its content should be similar to:
 
 ```yaml
-domain_name: "<replace>" # Options: archive.big-map.eu, big-map-archive-demo.materialscloud.org, big-map-archive-demo-public.materialscloud.org
-token: "<replace>"
+domain_name: "big-map-archive-demo.materialscloud.org" # Options: archive.big-map.eu, big-map-archive-demo.materialscloud.org, big-map-archive-demo-public.materialscloud.org
+token: "123456789"
 ```
 
 Note that to get an API token for the targeted BIG-MAP Archive, you need an account on the data repository. 
-To request an account, email us at `big-map-archive@materialscloud.org`. 
+To request an account, email us at big-map-archive@materialscloud.org. 
 Once logged in, navigate to `https://<archive_domain_name>/account/settings/applications` and create a token.
 
 The command `bma finales-db back-up` requires another YAML configuration file that specifies the IP address and the port for the targeted FINALES server, and credentials for a user account on the server.
 This corresponds to the command option `--finales-config-file`. 
 We recommend to place such a file in your project directory and to name it `finales_config.yaml`. Its content should be similar to:
 ```yaml
-ip_address: "<replace>" # Replace by IP address for a FINALES server
-port: "<replace>" # Replace by port for a FINALES server
-username: "<replace>" # Replace by valid username
-password: "<replace>" # Replace by valid password
+ip_address: "0.0.0.0" # Replace by IP address for a FINALES server
+port: "1234" # Replace by port for a FINALES server
+username: "test" # Replace by valid username
+password: "test" # Replace by valid password
 ```
 
 ### Metadata files
@@ -337,9 +338,18 @@ Options:
   --help                          Show this message and exit.
 ````
 
+## Back-up policy for FINALES databases
+
+The following back-up policy applies to the database of FINALES servers in production:
+- There should be a single entry in the main BIG-MAP Archive per "campaign" on the FINALES server.
+- An entry may have multiple versions, with one version created and published each time a back-up of the database occurs. Note that if a data file remains unchanged from one version to the next, the file is uploaded only once. However, the corresponding file link appears in the two entry versions. This saves storage space and reduces back-up time. 
+- A title is given to each version of an entry. It can be changed but, since it serves as an identifier of the campaign, should ideally remain unchanged across all versions of the same entry. To enforce this 'one title per "campaign"' policy, the command `bma finales-db back-up` asks for confirmation if the user attempts to change the title while creating a new version. 
+- A single service account is used for doing back-ups of a given "campaign".
+- The same service account can be used for multiple "campaigns".
+
 ## Support
 
-If you have any comments or questions, please send your emails to big-map-archive@materialscloud.org.
+If you have any comments or questions, email us at big-map-archive@materialscloud.org.
 
 ## Issue
 
