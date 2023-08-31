@@ -60,8 +60,9 @@ def cmd_record_create(config_file,
 
         # Upload data files and insert links in the draft's metadata
         filenames = get_data_files_in_upload_dir(base_dir_path, data_files)
+        click.echo('Files are being uploaded...')
         client.upload_files(record_id, base_dir_path, data_files, filenames)
-
+        click.echo('Files were uploaded.')
         click.echo('A new entry was created.')
 
         # Publish draft depending on user's choice
@@ -275,7 +276,9 @@ def cmd_record_update(config_file,
 
             # 5. Get a list of files to upload and upload them
             filenames = client.get_files_to_upload(record_id, base_dir_path, data_files)
+            click.echo('Files are being uploaded...')
             client.upload_files(record_id, base_dir_path, data_files, filenames)
+            click.echo('Files were uploaded.')
 
             click.echo('A new version was created.')
 
