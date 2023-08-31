@@ -111,7 +111,14 @@ references: # Choose among these options for the reference scheme: arxiv, doi, i
 
 ### Data files
 
+Two commands offer the possibility to attach data files of your choosing to your records: `bma record create` and `bma record update`.
+Please comply with the following rules: a maximum of 100 files per record and a total file size smaller than 100 GB per record.
+The command option `--data-files` should point to the directory where the files to be uploaded and linked to the newly created record are located. 
+We recommend to place such a folder in your project directory and to name it `upload`.
+
 ## Usage
+
+You may want to test a command against a [demo instance](https://big-map-archive-demo.materialscloud.org/), before executing it against the [main data repository](https://archive.big-map.eu/).
 
 ### Overview
 
