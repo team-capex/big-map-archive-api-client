@@ -54,7 +54,7 @@ $ which bma
 
 Each command requires a YAML configuration file that specifies the domain name and an API token for the targeted data repository. 
 This is indicated by the command options `--config-file` and `--bma-config-file`. 
-We also recommend to place such a file in your project directory and to name it `bma_config.yaml`. Its content should be:
+We also recommend to place such a file in your project directory and to name it `bma_config.yaml`. Its content should be similar to:
 
 ```yaml
 domain_name: "<replace>" # Options: archive.big-map.eu, big-map-archive-demo.materialscloud.org, big-map-archive-demo-public.materialscloud.org
@@ -67,7 +67,7 @@ Once logged in, navigate to `https://<archive_domain_name>/account/settings/appl
 
 The command `bma finales-db back-up` requires another YAML configuration file that specifies the IP address and the port for the targeted FINALES server, and credentials for a user account on the server.
 This corresponds to the command option `--finales-config-file`. 
-We recommend to place such a file in your project directory and to name it `finales_config.yaml`. Its content should be:
+We recommend to place such a file in your project directory and to name it `finales_config.yaml`. Its content should be similar to:
 ```yaml
 ip_address: "<replace>" # Replace by IP address for a FINALES server
 port: "<replace>" # Replace by port for a FINALES server
