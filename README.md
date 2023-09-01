@@ -342,6 +342,8 @@ While executing the command, a user will be asked for confirmation if:
 - The user attempts to create an entry (i.e., no record id is provided) but he/she already owns a published record with the same title. This is to prevent users from creating new entries inadvertently. 
 - The user tries to update an existing entry (a record id is provided) but the new version would have a different title. This is to enforce our 'one title per "campaign"' policy (see [Back-up policy for FINALES databases](#back-up-policy-for-finales-databases))
 
+For backing up production databases, consider using the `metadata.yaml` in `data/input/finales-db_back-up`, which was encrypted by means of the `ansible-vault` command. 
+
 ## Back-up policy for FINALES databases
 
 The following back-up policy applies to the database of FINALES servers in production:
