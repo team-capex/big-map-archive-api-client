@@ -37,7 +37,7 @@ python -m venv /home/<username>/.virtualenvs/<virtual_env_name>
 source /home/<username>/.virtualenvs/<virtual_env_name>/bin/activate
 ```
 
-3. Install the `big-map-archive-api-client` package along with its dependencies in the virtual environment:
+3. Install the `wheel` package and the `big-map-archive-api-client` package along with its dependencies in the virtual environment:
 
 ```bash
 pip install wheel big-map-archive-api-client
