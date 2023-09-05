@@ -28,25 +28,25 @@ We recommend that you proceed as follows to install the Python package and its d
 1. Create a virtual environment
 
 ```bash
-$ python -m venv /home/<username>/.virtualenvs/<virtual_env_name>
+python -m venv /home/<username>/.virtualenvs/<virtual_env_name>
 ```
 
 2. Activate the virtual environment
 
 ```bash
-$ source /home/<username>/.virtualenvs/<virtual_env_name>/bin/activate
+source /home/<username>/.virtualenvs/<virtual_env_name>/bin/activate
 ```
 
 3. Install the `big-map-archive-api-client` package along with its dependencies in the virtual environment:
 
 ```bash
-$ pip install big-map-archive-api-client
+pip install wheel big-map-archive-api-client
 ```
 
 4. [Optional] Once installed, check that the executable file associated with `bma` is indeed located in the virtual environment:
 
 ```bash
-$ which bma
+which bma
 ```
 
 5. [Optional] Create a project directory (to store configuration, input, and output files).
@@ -127,7 +127,7 @@ You may want to test a command against a [demo instance](https://big-map-archive
 ### Overview
 
 ```
-$ bma --help
+bma --help
 ```
 ```text
 Usage: bma [OPTIONS] COMMAND [ARGS]...
@@ -143,7 +143,7 @@ Commands:
 ```
 
 ```bash
-$ bma record --help
+bma record --help
 ```
 
 ```text
@@ -162,7 +162,7 @@ Commands:
 ```
 
 ```bash
-$ bma finales-db --help
+bma finales-db --help
 ```
 
 ```text
@@ -180,7 +180,7 @@ Commands:
 ### Get records
 
 ```bash
-$ bma record get --help
+bma record get --help
 ```
 
 ```text
@@ -202,7 +202,7 @@ Options:
 ```
 
 ```bash
-$ bma record get-all --help
+bma record get-all --help
 ```
 
 ```text
@@ -227,7 +227,7 @@ Options:
 ### Create records
 
 ```bash
-$ bma record create --help
+bma record create --help
 ```
 
 ```text
@@ -255,7 +255,7 @@ Options:
 ### Update records
 
 ```bash
-$ bma record update --help
+bma record update --help
 ```
 
 ```text
@@ -298,7 +298,7 @@ Options:
 ### Back up FINALES databases
 
 ```bash
-$ bma finales-db back-up --help
+bma finales-db back-up --help
 ```
 
 ```text
