@@ -37,19 +37,25 @@ python -m venv /home/<username>/.virtualenvs/<virtual_env_name>
 source /home/<username>/.virtualenvs/<virtual_env_name>/bin/activate
 ```
 
-3. Install the `wheel` package and the `big-map-archive-api-client` package along with its dependencies in the virtual environment:
+3. Install the `wheel` package if needed (see [here](https://stackoverflow.com/questions/69369669/python-3-venv-and-the-wheel-package))
 
 ```bash
-pip install wheel big-map-archive-api-client
+pip install wheel
 ```
 
-4. [Optional] Once installed, check that the executable file associated with `bma` is indeed located in the virtual environment:
+4. Install the `big-map-archive-api-client` package along with its dependencies in the virtual environment:
+
+```bash
+pip install big-map-archive-api-client
+```
+
+5. [Optional] Once installed, check that the executable file associated with `bma` is indeed located in the virtual environment:
 
 ```bash
 which bma
 ```
 
-5. [Optional] Create a project directory (to store configuration, input, and output files).
+6. [Optional] Create a project directory (to store configuration, input, and output files).
 
 ### Configuration files
 
