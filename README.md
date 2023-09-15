@@ -348,7 +348,7 @@ While executing the command, a user will be asked for confirmation if:
 - The user attempts to create an entry (i.e., no record id is provided) but he/she already owns a published record with the same title. This is to prevent users from creating new entries inadvertently. 
 - The user tries to update an existing entry (a record id is provided) but the new version would have a different title. This is to enforce our 'one title per "campaign"' policy (see [Back-up policy for FINALES databases](#back-up-policy-for-finales-databases))
 
-When backing up a production database, put the corresponding `metadata.yaml` file under version control in the [finales-db-back-up](https://github.com/materialscloud-org/finales-db-back-up) GitHub repository. 
+When backing up a production database, put the corresponding `metadata.yaml` file under version control in the [big-map-archive-api-client-finales](https://github.com/materialscloud-org/big-map-archive-api-client-finales) GitHub repository. 
 
 ## Back-up policy for FINALES databases
 
