@@ -102,6 +102,20 @@ def cmd_finales_db_copy(ctx,
         results_file_path = os.path.join(base_dir_path, temp_dir_path, results_filename)
         export_to_json_file(base_dir_path, results_file_path, response)
 
+        # 4. Database file
+        # Avoid storing the whole file in memory as it may be large
+        # See https://requests.readthedocs.io/en/latest/user/quickstart/
+        stream = True
+        chunk_size = 10000  # in byte
+
+        response = client.get_database_file(finales_token, stream)
+        results_filename = 'sqlite.db'
+        results_file_path = os.path.join(base_dir_path, temp_dir_path, results_filename)
+
+        with open(results_file_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=chunk_size):
+                f.write(chunk)
+
         # Create an ArchiveAPIClient object to interact with the archive
         config_file_path = os.path.join(base_dir_path, bma_config_file)
         client_config = ClientConfig.load_from_config_file(config_file_path)
