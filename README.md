@@ -310,10 +310,7 @@ bma finales-db back-up --help
 ```text
 Usage: bma finales-db back-up [OPTIONS]
 
-  Perform a partial back-up from the database of a FINALES server to a BIG-MAP
-  Archive. A new entry version is created and published. Its linked files
-  include data related to capabilities, requests, and results for requests.
-
+  Back up the SQLite database of a FINALES server to a BIG-MAP Archive. This creates and publishes a new entry version, which provides links to data extracted from the database (capabilities, requests, and results for requests) and a copy of the whole database.
 Options:
   --bma-config-file FILE          Path to the YAML file that specifies the
                                   domain name and a personal access token for

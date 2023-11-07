@@ -9,6 +9,7 @@ class FinalesClientConfig(BaseModel):
     port: int
     username: str
     password: str
+    database_endpoint_access_key: str
 
     @classmethod
     def load_from_config_file(cls, file_path):
@@ -27,4 +28,4 @@ class FinalesClientConfig(BaseModel):
         Creates a client to interact with Finales' API
         Initializes internal fields
         """
-        return FinalesAPIClient(self.ip_address, self.port, self.username, self.password)
+        return FinalesAPIClient(self.ip_address, self.port, self.username, self.password, self.database_endpoint_access_key)

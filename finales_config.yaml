@@ -2,3 +2,4 @@ ip_address: <replace> # IP address of a FINALES server
 port: <replace> # Port for a FINALES server
 username: <replace> # Credentials for a user account on a FINALES server
 password: <replace>
+database_endpoint_access_key: <replace> # Access key for the database API endpoint

@@ -6,13 +6,14 @@ class FinalesAPIClient:
     Class to interact with BMA's API
     """
 
-    def __init__(self, ip_address, port, username, password):
+    def __init__(self, ip_address, port, username, password, database_endpoint_access_key):
         """
         Initialize internal variables
         """
         self._connection = FinalesRestAPIConnection(ip_address, port)
         self._username = username
         self._password = password
+        self._database_endpoint_access_key = database_endpoint_access_key
 
     def post_authenticate(self):
         """
@@ -67,3 +68,15 @@ class FinalesAPIClient:
         response = self._connection.get(resource_path, token)
         response.raise_for_status()
         return response.json()
+
+    def get_database_file(self, token, stream):
+        """
+        Downloads a copy of the SQLite database file
+        This is done in chunks if stream is set to True
+        Raises an HTTPError exception if the request fails
+        """
+        access_key = self._database_endpoint_access_key
+        resource_path = f'/database_dump/{access_key}'
+        response = self._connection.get(resource_path, token, stream=stream)
+        response.raise_for_status()
+        return response

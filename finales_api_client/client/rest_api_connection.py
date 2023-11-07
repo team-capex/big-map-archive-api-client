@@ -33,7 +33,7 @@ class FinalesRestAPIConnection:
         response = requests.post(url, **kwargs)
         return response
 
-    def get(self, resource_path, token, query_string='', payload=None):
+    def get(self, resource_path, token, query_string='', payload=None, stream=False):
         """
         Sends a GET request and returns a response
         """
@@ -48,6 +48,7 @@ class FinalesRestAPIConnection:
         }
 
         kwargs['headers'] = request_headers
+        kwargs['stream'] = stream
 
         if payload is not None:
             kwargs['data'] = payload
