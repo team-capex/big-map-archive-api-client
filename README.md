@@ -311,7 +311,7 @@ bma finales-db back-up --help
 Usage: bma finales-db back-up [OPTIONS]
 
   Perform a back-up of a FINALES server's database. A new entry version is created and published in a BIG-MAP Archive. 
-  Uploaded data include capabilities, requests, results for requests, and a copy of the whole database.
+  Uploaded data include capabilities, requests, results for requests, and a copy of the SQLite database file.
 
 Options:
   --bma-config-file FILE          Path to the YAML file that specifies the
