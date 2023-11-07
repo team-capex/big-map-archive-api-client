@@ -71,7 +71,8 @@ class FinalesAPIClient:
 
     def get_database_file(self, token, stream):
         """
-        Downloads a database file in chunks if stream is set to True
+        Downloads a copy of the SQLite database file
+        This is done in chunks if stream is set to True
         Raises an HTTPError exception if the request fails
         """
         access_key = self._database_endpoint_access_key
