@@ -43,10 +43,11 @@ source /home/<username>/.virtualenvs/<virtual_env_name>/bin/activate
 pip install wheel
 ```
 
-4. Install the `big-map-archive-api-client` package along with its dependencies in the virtual environment:
+4. Install the `big-map-archive-api-client` package along with its dependencies in the virtual environment.
+Install version 1.2.0 for the latest version of the BIG-MAP Archive:
 
 ```bash
-pip install big-map-archive-api-client
+pip install big-map-archive-api-client==1.2.0
 ```
 
 5. [Optional] Once installed, check that the executable file associated with `bma` is indeed located in the virtual environment:
@@ -125,6 +126,11 @@ Please comply with the following rules:
 - a total file size smaller than 100 GB per record.
 
 The command option `--data-files` should point to the directory where the files to be uploaded and attached to the new record are located. We usually place such a folder in our project directory and name it `upload`.
+
+### Community
+
+To publish a record to a community you need to specify the community `slug`.
+Login at `https://<archive_domain_name>`. The list of communities you have access to is at the link `https://<archive_domain_name>/api/communities`. Look for the value slug, you will need to add this value when publishing a record to the community. Example: for the BIG-MAP community the slug is bigmap, for BATTERY2030 the slug is battery2030.
 
 ## Usage
 
@@ -254,6 +260,8 @@ Options:
                           to be uploaded and linked to the record. See
                           data/input/example/create_record/upload in the
                           GitHub repository.  [required]
+  --slug TEXT             Community slug of the record. Example: for the BIG-
+                          MAP community the slug is bigmap.  [required]
   --publish               Publish the created record.
   --help                  Show this message and exit.
 ```
@@ -338,6 +346,9 @@ Options:
                                   This is discouraged in production. If you
                                   select this option, either publish or delete
                                   the newly created draft, e.g., via the GUI.
+  --slug TEXT                     Community slug of the record. Example: for
+                                  the BIG-MAP community the slug is bigmap.
+                                  [required]
   --help                          Show this message and exit.
 ````
 
