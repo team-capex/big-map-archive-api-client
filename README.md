@@ -65,7 +65,8 @@ This is indicated by the command options `--config-file` and `--bma-config-file`
 We also recommend to place such a file in your project directory and to name it `bma_config.yaml`. Its content should be similar to:
 
 ```yaml
-domain_name: "big-map-archive-demo.materialscloud.org" # Options: archive.big-map.eu, big-map-archive-demo.materialscloud.org, big-map-archive-demo-public.materialscloud.org
+domain_name: "archive-capex.energy.dtu.dk" # Options: archive.big-map.eu, archive-demo-capex.energy.dtu.dk, archive-demo-big-map.eu
+port: 5000
 token: "123456789"
 ```
 
